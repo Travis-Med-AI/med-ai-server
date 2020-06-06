@@ -1,26 +1,30 @@
-version: '3.3'
+version: '3.5'
 services:
-  db:
-    build:
-      context: .
-      dockerfile: ./dockerfiles/postgres.dockerfile
-    environment:
-      - POSTGRES_DB=ai
-      - POSTGRES_USER=test
-      - POSTGRES_PASSWORD=test
-    ports:
-      - "5432:5432"
-  server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - 8000:8000
-    depends_on: 
-      - db
-    volumes:
-      - type: bind
-        source: .
-        target: /opt
-        volume:
-          nocopy: true
+    postgres-db:
+        build:
+            context: .
+            dockerfile: ./dockerfiles/postgres.dockerfile
+        environment:
+            - POSTGRES_DB=ai
+            - POSTGRES_USER=test
+            - POSTGRES_PASSWORD=test
+        ports:
+            - "5432:5432"
+
+    server:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        restart: on-failure
+        ports:
+            - 8000:8000
+        depends_on: 
+            - postgres-db
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+    default:
+        external:
+            name: ai-network
+    

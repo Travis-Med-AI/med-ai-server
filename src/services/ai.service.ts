@@ -16,8 +16,8 @@ import {Docker} from 'node-docker-api';
 export class AiService {
     docker = new Docker({ socketPath: '/var/run/docker.sock' });
     celeryClient = Celery.createClient({
-        brokerUrl: 'amqp://localhost',
-        resultBackend: 'redis://localhost'
+        brokerUrl: 'amqp://rabbitmq',
+        resultBackend: 'redis://redis'
     });
 
     modelRepository = this.db.getRepository<Model>(Model);
@@ -46,7 +46,7 @@ export class AiService {
     }
 
     async getStudyMedia(studyId: string): Promise<string> {
-        let url = `http://localhost:8042/studies/${studyId}/media`
+        let url = `http://orthanc:8042/studies/${studyId}/media`
         let study = await axios.get(url, {responseType: 'arraybuffer'})
 
         let filePath = `/tmp/${studyId}.zip`;

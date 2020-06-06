@@ -1,3 +1,4 @@
+FROM docker:dind
 FROM node:12.8.0
 
 WORKDIR /opt
