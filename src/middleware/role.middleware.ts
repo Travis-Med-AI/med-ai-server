@@ -4,7 +4,7 @@ import { TYPES } from "../constants/types";
 import { DatabaseService } from "../services/database.service";
 import { Request, NextFunction, Response } from "express";
 import { CutsomRequest } from "../interfaces/Request";
-import { ROLES } from "../constants/roles";
+import { ROLES } from "../enums/roles";
 import { BaseMiddleware } from "inversify-express-utils";
 
 const checkRole = (req: CutsomRequest<any>, role: ROLES):boolean => req.user.roles.findIndex(r => r.name === ROLES.admin) != -1;

@@ -6,6 +6,8 @@ export const TYPES = {
     UserFactory: Symbol.for('UserFactory'),
 
     AuthMiddleware: Symbol.for('AuthMiddleware'),
-    AdminMiddleware: Symbol.for('AdminMiddleware')
+    AdminMiddleware: Symbol.for('AdminMiddleware'),
 
+    AiFatory: Symbol.for('AiFactory'),
+    AiService: Symbol.for('AiService'),
 }

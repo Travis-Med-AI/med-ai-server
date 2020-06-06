@@ -1,6 +1,6 @@
 import {MigrationInterface, QueryRunner, getRepository} from "typeorm";
 import { Role } from "../entity/Role.entity";
-import { Roles } from "../constants/roles";
+import { Roles } from "../enums/roles";
 
 export class SeedRoles1590364873831 implements MigrationInterface {
 

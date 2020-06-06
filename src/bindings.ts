@@ -5,6 +5,8 @@ import { UserService } from "./services/user.service";
 import { DatabaseService } from "./services/database.service";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { AdminMiddleware } from "./middleware/role.middleware";
+import { AiFactory } from "./factories/ai.factory";
+import { AiService } from './services/ai.service';
 
 export let container = new Container();
 
@@ -16,3 +18,5 @@ container.bind<UserService>(TYPES.UserService).to(UserService);
 container.bind<AuthMiddleware>(TYPES.AuthMiddleware).to(AuthMiddleware);
 container.bind<AdminMiddleware>(TYPES.AdminMiddleware).to(AdminMiddleware);
 
+container.bind<AiService>(TYPES.AiService).to(AiService);
+container.bind<AiFactory>(TYPES.AiFatory).to(AiFactory);

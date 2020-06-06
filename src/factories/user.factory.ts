@@ -2,7 +2,7 @@ import { injectable } from 'inversify';
 import { User } from '../entity/User.entity';
 import { UserViewModel } from '../interfaces/UserViewModel';
 import { Role } from '../entity/Role.entity';
-import { ROLES } from '../constants/roles';
+import { ROLES } from '../enums/roles';
 import { userInfo } from 'os';
 import { NewUserRequest } from '../interfaces/NewUserRequest';
 

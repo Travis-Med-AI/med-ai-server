@@ -9,7 +9,7 @@ import { AppSettings } from "../constants/appSettings";
 import crypto from "crypto";
 import { UserViewModel } from "../interfaces/UserViewModel";
 import { Role } from "../entity/Role.entity";
-import { ROLES } from "../constants/roles";
+import { ROLES } from "../enums/roles";
 import { NewUserRequest } from "../interfaces/NewUserRequest";
 
 @injectable()

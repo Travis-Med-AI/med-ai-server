@@ -1,9 +1,11 @@
 version: '3'
 services:
   db:
-    image: postgres
+    build:
+      context: .
+      dockerfile: ./dockerfiles/postgres.dockerfile
     environment:
-      - POSTGRES_DB=test
+      - POSTGRES_DB=ai
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
     ports:
