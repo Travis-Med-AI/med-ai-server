@@ -7,13 +7,15 @@ import './controllers';
 import { createConnection, Connection } from 'typeorm';
 import { TYPES } from './constants/types';
 import jwt from 'express-jwt';
-import { AppSettings } from './constants/appSettings';
+import { APP_SETTINGS } from './constants/appSettings';
+import cors from 'cors';
 
 const configServer = (app) => {
     app.use(bodyParser.urlencoded({
         extended: true
     }));
     app.use(bodyParser.json());
+    app.use(cors())
 }
 
 const configError = (app) => {
@@ -31,6 +33,6 @@ createConnection().then(connection => {
     server.setErrorConfig(configError);
 
     let app = server.build();
-    app.listen(AppSettings.port);
-    console.log(`server listening on port ${AppSettings.port}`)
+    app.listen(APP_SETTINGS.port);
+    console.log(`server listening on port ${APP_SETTINGS.port}`)
 })

@@ -11,17 +11,21 @@ services:
         ports:
             - "5432:5432"
 
-    server:
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-        restart: on-failure
-        ports:
-            - 8000:8000
-        depends_on: 
-            - postgres-db
-        volumes:
-            - /var/run/docker.sock:/var/run/docker.sock
+    # server:
+    #     build:
+    #         context: .
+    #         dockerfile: ./Dockerfile
+    #     restart: on-failure
+    #     ports:
+    #         - 8000:8000
+    #     depends_on: 
+    #         - postgres-db
+    #     environment: 
+    #         - ORTHANC_HOST=orthanc
+    #         - REDIS_HOST=redis
+    #         - RABBITMQ_HOST=rabbitmq
+    #     volumes:
+    #         - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
     default:

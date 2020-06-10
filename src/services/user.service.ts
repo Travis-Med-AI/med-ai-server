@@ -5,7 +5,7 @@ import { DatabaseService} from './database.service';
 import { User } from '../entity/User.entity';
 import { Repository, In } from "typeorm";
 import jwt from "jsonwebtoken";
-import { AppSettings } from "../constants/appSettings";
+import { APP_SETTINGS } from "../constants/appSettings";
 import crypto from "crypto";
 import { UserViewModel } from "../interfaces/UserViewModel";
 import { Role } from "../entity/Role.entity";
@@ -84,7 +84,7 @@ export class UserService {
     }
 
     generateToken(userId: number): string {
-        const token = jwt.sign({id: userId}, AppSettings.secret, { expiresIn: '1h' });
+        const token = jwt.sign({id: userId}, APP_SETTINGS.secret, { expiresIn: '1h' });
         return token;
     }
 }

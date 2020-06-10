@@ -10,4 +10,6 @@ export const TYPES = {
 
     AiFatory: Symbol.for('AiFactory'),
     AiService: Symbol.for('AiService'),
+
+    AppSettingsService: Symbol.for('AppSettingsService')
 }

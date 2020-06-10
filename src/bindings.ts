@@ -7,6 +7,8 @@ import { AuthMiddleware } from "./middleware/auth.middleware";
 import { AdminMiddleware } from "./middleware/role.middleware";
 import { AiFactory } from "./factories/ai.factory";
 import { AiService } from './services/ai.service';
+import { AppSettings } from "./interfaces/AppSettings";
+import { AppSettingsService } from "./services/appSettings.service";
 
 export let container = new Container();
 
@@ -20,3 +22,5 @@ container.bind<AdminMiddleware>(TYPES.AdminMiddleware).to(AdminMiddleware);
 
 container.bind<AiService>(TYPES.AiService).to(AiService);
 container.bind<AiFactory>(TYPES.AiFatory).to(AiFactory);
+
+container.bind<AppSettingsService>(TYPES.AppSettingsService).to(AppSettingsService);

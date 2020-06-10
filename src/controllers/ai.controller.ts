@@ -4,15 +4,12 @@ import {
 import { Response } from 'express';
 import { inject } from 'inversify';
 import { TYPES } from '../constants/types';
-import { UserService } from '../services/user.service';
-import { User } from '../entity/User.entity';
-import { UserViewModel } from '../interfaces/UserViewModel';
 import { CutsomRequest } from '../interfaces/Request';
-import { Role } from '../entity/Role.entity';
-import { NewUserRequest } from '../interfaces/NewUserRequest';
-import { SignInRequest } from '../interfaces/SignInRequest';
 import { AiService } from '../services/ai.service';
 import { ModelViewModel } from '../interfaces/ModelViewModel';
+import { EvalJobViewModel } from '../interfaces/EvalJobViewModel';
+import { EvalJob } from '../entity/EvalJob.entity';
+import { StudyEvaluation } from '../entity/Study.entity';
 
 @controller('/ai')
 export class AiController {
@@ -23,14 +20,53 @@ export class AiController {
         return this.aiService.processDicom(+req.params.modelId, req.params.studyId);
     }
 
-    @httpPost('/registerModel')
+    @httpGet('/models')
+    public async getModels(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel[]> {
+        return this.aiService.getModels();
+    }
+
+    @httpGet('/studies')
+    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<string[]> {
+        return this.aiService.getStudies();
+    }
+
+
+    @httpGet('/evals')
+    public async getStudyEval(req: CutsomRequest<ModelViewModel>, res: Response): Promise<StudyEvaluation[]> {
+        return this.aiService.getEvals();
+    }
+
+    @httpGet('/images')
+    public async getImages(req: CutsomRequest<any>, res: Response): Promise<string[]> {
+        return this.aiService.getImages();
+    }
+
+    @httpGet('/eval-jobs')
+    public async getEvalJobs(req: CutsomRequest<any>, res: Response): Promise<EvalJob[]> {
+        return this.aiService.getEvalJobs();
+    }
+
+    @httpPost('/evaluate')
+    public async evaluate(req: CutsomRequest<{id: 1}>, res: Response): Promise<any> {
+        console.log(req.body.id)
+        return this.aiService.evaluateStudies(+req.body.id);
+    }
+
+    @httpPost('/register-model')
     public async registerModel(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
         return this.aiService.registerModel(req.body)
     }
 
-    @httpGet('/models')
-    public async getModels(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel[]> {
-        return this.aiService.getModels();
+    @httpPost('/start-job')
+    public async startJob(req: CutsomRequest<EvalJobViewModel>, res: Response): Promise<EvalJobViewModel> {
+        return this.aiService.startJob(req.body);
     }
+
+    @httpPost('/kill-job')
+    public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJob> {
+        return this.aiService.killJob(req.body.id);
+    }
+
+
 
 }

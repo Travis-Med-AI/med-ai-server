@@ -6,7 +6,7 @@ import { Request, Response, NextFunction } from 'express';
 import { CutsomRequest } from '../interfaces/Request';
 import { User } from '../entity/User.entity';
 import jwt from "jsonwebtoken";
-import { AppSettings} from '../constants/appSettings';
+import { APP_SETTINGS} from '../constants/appSettings';
 
 @injectable()
 export class AuthMiddleware extends BaseMiddleware {
@@ -25,7 +25,7 @@ export class AuthMiddleware extends BaseMiddleware {
             token = token.slice(7, token.length).trimLeft();
 
             // decode token
-            let decodedToken = jwt.verify(token, AppSettings.secret) as {id: number}
+            let decodedToken = jwt.verify(token, APP_SETTINGS.secret) as {id: number}
 
             // add user to request using id from token
             let repo = this.db.getRepository<User>(User)

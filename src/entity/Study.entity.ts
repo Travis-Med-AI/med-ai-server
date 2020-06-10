@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, OneToOne} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from "typeorm";
 import { Model } from "./Image.entity";
 import { EvaluationStatus } from "../enums/EvaluationStatus";
 
@@ -15,10 +15,13 @@ export class StudyEvaluation {
     @Column({nullable: true, type: 'jsonb'})
     modelOutput: any;
 
-    @OneToOne(type => Model)
+    @ManyToOne(type => Model)
     @JoinColumn()
-    model: Model
+    model: number | Model
 
     @Column()
     status: EvaluationStatus
+
+    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
+    lastUpdate: number;
 }
