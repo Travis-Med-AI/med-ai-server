@@ -10,7 +10,7 @@ export class AppSettingsService {
     appSettings = APP_SETTINGS
     constructor(
     ) {
-
+        this.getSettings()
     }
 
     getSettings() {
