@@ -4,6 +4,8 @@ services:
         build:
             context: .
             dockerfile: ./dockerfiles/postgres.dockerfile
+        volumes:
+            - postgres-volume:/var/lib/postgresql/data
         environment:
             - POSTGRES_DB=ai
             - POSTGRES_USER=test
@@ -26,7 +28,9 @@ services:
             - RABBITMQ_HOST=rabbitmq
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-
+volumes:
+    postgres-volume:
+        name: postgres-volume
 networks:
     default:
         external:
