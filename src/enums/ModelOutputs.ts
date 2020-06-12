@@ -1,4 +1,5 @@
 export enum ModelOutputs {
     classProbabilities = 'Class_Probabilities',
-    mask = 'Mask'
+    mask = 'Mask',
+    modelType = "Study_Type"
 }

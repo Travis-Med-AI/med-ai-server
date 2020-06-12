@@ -1,7 +1,7 @@
 import { injectable } from 'inversify';
 import { ModelViewModel } from '../interfaces/ModelViewModel';
-import { Model } from '../entity/Image.entity';
-import { StudyEvaluation } from '../entity/Study.entity';
+import { Model } from '../entity/Model.entity';
+import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
 import { EvaluationStatus } from '../enums/EvaluationStatus';
 import { EvalJobViewModel } from '../interfaces/EvalJobViewModel';
 import { EvalJob } from '../entity/EvalJob.entity';
@@ -30,10 +30,10 @@ export class AiFactory {
         }
     }
 
-    buildStudy(modelId: number, patientId: string, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
+    buildStudy(modelId: number, studyId: number, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
         let study = new StudyEvaluation();
         study.model = modelId;
-        study.patient = patientId;
+        study.study = studyId;
         if(modelOutput) study.modelOutput;
         study.status = status;
         

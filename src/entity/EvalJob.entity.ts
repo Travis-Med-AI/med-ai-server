@@ -1,6 +1,6 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from "typeorm";
 import { EvalJobStatus } from "../enums/EvalJobStatus";
-import { Model } from "./Image.entity";
+import { Model } from "./Model.entity";
 
 @Entity()
 export class EvalJob {

@@ -1,8 +1,8 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService} from './database.service';
-import { Model } from "../entity/Image.entity";
-import { StudyEvaluation } from "../entity/Study.entity";
+import { Model } from "../entity/Model.entity";
+import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
 import axios, { AxiosResponse } from 'axios';
 import fs from 'fs';
 import unzip from 'unzipper';
@@ -17,6 +17,7 @@ import { EvalJobViewModel } from "../interfaces/EvalJobViewModel";
 import { EvalJob } from "../entity/EvalJob.entity";
 import * as _ from 'lodash';
 import { EvalJobStatus } from "../enums/EvalJobStatus";
+import { Study } from "../entity/Study.entity";
 
 @injectable()
 export class AiService {
@@ -29,6 +30,7 @@ export class AiService {
     modelRepository = this.db.getRepository<Model>(Model);
     evalRepository = this.db.getRepository<StudyEvaluation>(StudyEvaluation);
     jobRepository = this.db.getRepository<EvalJob>(EvalJob);
+    studyRepository = this.db.getRepository<Study>(Study);
 
 
     constructor(
@@ -39,7 +41,7 @@ export class AiService {
         ) {
     }
 
-    async processDicom(modelId: number, studyId: string): Promise<any>{
+    async processDicom(modelId: number, studyId: number): Promise<any>{
         let model = await this.modelRepository.findOne({id: modelId});
 
         let filePath = await this.getStudyMedia(studyId);
@@ -68,12 +70,15 @@ export class AiService {
         return `started task for model ${modelId}`
     }
 
-    async getStudyMedia(studyId: string): Promise<string> {
-        let url = `${this.settingsService.getOrthancUrl()}/studies/${studyId}/media`
+    async getStudyMedia(studyId: number): Promise<string> {
+        let studyDb = await this.studyRepository.findOneOrFail({id: studyId})
+        let orthancId = studyDb.orthancStudyId;
+
+        let url = `${this.settingsService.getOrthancUrl()}/studies/${orthancId}/media`
         let study = await axios.get(url, {responseType: 'arraybuffer'})
 
-        let filePath = `${this.settingsService.appSettings.imageSaveLocation}${studyId}.zip`;
-        let outPath = `${this.settingsService.appSettings.imageSaveLocation}${studyId}`;
+        let filePath = `${this.settingsService.appSettings.imageSaveLocation}${orthancId}.zip`;
+        let outPath = `${this.settingsService.appSettings.imageSaveLocation}${orthancId}`;
         fs.writeFileSync(filePath, study.data);
 
         await new Promise((resolve, reject) => {
@@ -83,7 +88,7 @@ export class AiService {
             unzipped.on('error', reject);
         })
 
-        return studyId;
+        return orthancId;
     }
 
 
@@ -108,15 +113,15 @@ export class AiService {
         return models.map(m => this.aiFactory.buildModelViewModel(m));
     }
 
-    async evaluateStudy(modelId: number, patientId: string): Promise<StudyEvaluation> {
-        let study = this.aiFactory.buildStudy(modelId, patientId, EvaluationStatus.running);
+    async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
+        let study = this.aiFactory.buildStudy(modelId, studyId, EvaluationStatus.running);
         
         return this.evalRepository.save(study)
     }
 
-    async getStudies(): Promise<string[]> {
-        let patients = await axios.get<string[]>(`${this.settingsService.getOrthancUrl()}/studies`);
-        return patients.data
+    async getStudies(): Promise<Study[]> {
+        let studies = await this.studyRepository.find();
+        return studies;
     }
 
     async getEvals(): Promise<StudyEvaluation[]> {

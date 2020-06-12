@@ -9,7 +9,8 @@ import { AiService } from '../services/ai.service';
 import { ModelViewModel } from '../interfaces/ModelViewModel';
 import { EvalJobViewModel } from '../interfaces/EvalJobViewModel';
 import { EvalJob } from '../entity/EvalJob.entity';
-import { StudyEvaluation } from '../entity/Study.entity';
+import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
+import { Study } from '../entity/Study.entity';
 
 @controller('/ai')
 export class AiController {
@@ -17,7 +18,7 @@ export class AiController {
 
     @httpGet('/:modelId/:studyId') 
     public async processDicom(req: CutsomRequest<any>, res: Response): Promise<any> {
-        return this.aiService.processDicom(+req.params.modelId, req.params.studyId);
+        return this.aiService.processDicom(+req.params.modelId, +req.params.studyId);
     }
 
     @httpGet('/models')
@@ -26,7 +27,7 @@ export class AiController {
     }
 
     @httpGet('/studies')
-    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<string[]> {
+    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<Study[]> {
         return this.aiService.getStudies();
     }
 
