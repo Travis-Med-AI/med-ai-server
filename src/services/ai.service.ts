@@ -119,14 +119,21 @@ export class AiService {
         return this.evalRepository.save(study)
     }
 
-    async getStudies(): Promise<Study[]> {
-        let studies = await this.studyRepository.find();
-        return studies;
+    async getStudies(page: string, pageSize: string): Promise<{studies: Study[], total: number}> {
+        let studies = await this.studyRepository.findAndCount({
+            skip: +page,
+            take: +pageSize
+        });
+        return {studies: studies[0], total: studies[1]};
     }
 
-    async getEvals(): Promise<StudyEvaluation[]> {
-        let evals = this.evalRepository.find({relations: ['model']});
-        return evals
+    async getEvals(page: number, pageSize: number): Promise<{evals: StudyEvaluation[], total: number}> {
+        let evals = await this.evalRepository.findAndCount({
+            relations: ['model', 'study'],
+            skip: page,
+            take: pageSize
+        });
+        return {evals: evals[0], total: evals[1]}
     }
 
     async startJob(jobVM: EvalJobViewModel): Promise<EvalJobViewModel> {

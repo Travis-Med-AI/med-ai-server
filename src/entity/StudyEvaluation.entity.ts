@@ -1,10 +1,11 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, Unique} from "typeorm";
 import { Model } from "./Model.entity";
 import { EvaluationStatus } from "../enums/EvaluationStatus";
 import { Study } from "./Study.entity";
 
 
 @Entity()
+@Unique(['model', 'study'])
 export class StudyEvaluation {
 
     @PrimaryGeneratedColumn()

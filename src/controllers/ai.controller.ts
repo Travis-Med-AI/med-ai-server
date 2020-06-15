@@ -27,14 +27,13 @@ export class AiController {
     }
 
     @httpGet('/studies')
-    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<Study[]> {
-        return this.aiService.getStudies();
+    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<{studies: Study[], total: number}> {
+        return this.aiService.getStudies(req.query.page, req.query.pageSize);
     }
 
-
     @httpGet('/evals')
-    public async getStudyEval(req: CutsomRequest<ModelViewModel>, res: Response): Promise<StudyEvaluation[]> {
-        return this.aiService.getEvals();
+    public async getStudyEval(req: CutsomRequest<ModelViewModel>, res: Response): Promise<{evals: StudyEvaluation[], total: number}> {
+        return this.aiService.getEvals(+req.query.page, +req.query.pageSize);
     }
 
     @httpGet('/images')

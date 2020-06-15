@@ -9,10 +9,10 @@ export class Study {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({unique:true})
     orthancStudyId: string;
 
-    @Column('text')
+    @Column('text', {nullable: true})
     type: StudyType;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
