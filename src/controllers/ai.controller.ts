@@ -11,6 +11,7 @@ import { EvalJobViewModel } from '../interfaces/EvalJobViewModel';
 import { EvalJob } from '../entity/EvalJob.entity';
 import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
 import { Study } from '../entity/Study.entity';
+import { Model } from '../entity/Model.entity';
 
 @controller('/ai')
 export class AiController {
@@ -65,6 +66,11 @@ export class AiController {
     @httpPost('/kill-job')
     public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJob> {
         return this.aiService.killJob(req.body.id);
+    }
+
+    @httpPost('/set-classifier')
+    public async setClassifier(req: CutsomRequest<{model: string}>, res: Response): Promise<ModelViewModel> {
+        return this.aiService.setClassifier(req.body.model)
     }
 
 

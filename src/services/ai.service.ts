@@ -162,4 +162,13 @@ export class AiService {
         job.status = EvalJobStatus.stopped;
         return await this.jobRepository.save(job);
     }
+
+    async setClassifier(modelName:string): Promise<ModelViewModel> {
+        let classifier = await this.modelRepository.findOne({image: modelName});
+
+        if(!classifier) {
+            await this.modelRepository.save(this.aiFactory.buildModel({image: modelName, input: StudyType.di}))
+        }
+
+    }
 }
