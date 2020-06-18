@@ -1,5 +1,4 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
-import { ModelInputs } from "../enums/ModelInputs";
 import { ModelOutputs } from "../enums/ModelOutputs";
 import { StudyType } from "../enums/StudyType";
 
@@ -13,7 +12,7 @@ export class Model {
     image: string;
 
     @Column()
-    input: ModelInputs
+    input: StudyType
 
     @Column({nullable: true})
     inputType: StudyType

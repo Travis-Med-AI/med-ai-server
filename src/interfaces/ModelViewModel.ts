@@ -1,9 +1,9 @@
-import { ModelInputs } from "../enums/ModelInputs";
 import { ModelOutputs } from "../enums/ModelOutputs";
+import { StudyType } from "../enums/StudyType";
 
 export interface ModelViewModel {
     id?:number;
     image: string;
-    input: ModelInputs;
+    input: StudyType;
     output: ModelOutputs;
 }
