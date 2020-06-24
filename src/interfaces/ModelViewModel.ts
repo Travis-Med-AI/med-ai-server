@@ -6,4 +6,5 @@ export interface ModelViewModel {
     image: string;
     input: StudyType;
     output: ModelOutputs;
+    hasImageOutput: boolean;
 }

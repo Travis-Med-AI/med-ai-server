@@ -17,7 +17,7 @@ services:
         build:
             context: .
             dockerfile: ./Dockerfile
-        restart: on-failure
+        restart: unless-stopped
         ports:
             - 8000:8000
         depends_on: 
@@ -28,9 +28,13 @@ services:
             - RABBITMQ_HOST=rabbitmq
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
+            - ai-images:/tmp
 volumes:
     postgres-volume:
         name: postgres-volume
+    ai-images:
+        external:
+            name: ai-images
 networks:
     default:
         external:

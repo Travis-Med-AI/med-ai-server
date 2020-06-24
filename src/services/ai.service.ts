@@ -18,6 +18,10 @@ import { EvalJob } from "../entity/EvalJob.entity";
 import * as _ from 'lodash';
 import { EvalJobStatus } from "../enums/EvalJobStatus";
 import { Study } from "../entity/Study.entity";
+import { StudyType } from "../enums/StudyType";
+import { ModelOutputs } from "../enums/ModelOutputs";
+import { Classifier } from "../entity/Classifier.entity";
+import { Like, IsNull } from "typeorm";
 
 @injectable()
 export class AiService {
@@ -31,6 +35,7 @@ export class AiService {
     evalRepository = this.db.getRepository<StudyEvaluation>(StudyEvaluation);
     jobRepository = this.db.getRepository<EvalJob>(EvalJob);
     studyRepository = this.db.getRepository<Study>(Study);
+    classifierRepository = this.db.getRepository<Classifier>(Classifier);
 
 
     constructor(
@@ -43,15 +48,14 @@ export class AiService {
 
     async processDicom(modelId: number, studyId: number): Promise<any>{
         let model = await this.modelRepository.findOne({id: modelId});
-
-        let filePath = await this.getStudyMedia(studyId);
+        let study = await this.studyRepository.findOne({id: studyId})
 
         const task: Celery.Task<string> = this.celeryClient.createTask<string>('runner.evaluate_dicom');
 
-        let study = await this.evaluateStudy(model.id, studyId)
+        let evaluation = await this.evaluateStudy(model.id, studyId)
 
         task.applyAsync({
-            args: [model.image, filePath, study.id],
+            args: [model.image, study.orthancStudyId, evaluation.id],
             kwargs: {}
         })
         
@@ -70,32 +74,11 @@ export class AiService {
         return `started task for model ${modelId}`
     }
 
-    async getStudyMedia(studyId: number): Promise<string> {
-        let studyDb = await this.studyRepository.findOneOrFail({id: studyId})
-        let orthancId = studyDb.orthancStudyId;
-
-        let url = `${this.settingsService.getOrthancUrl()}/studies/${orthancId}/media`
-        let study = await axios.get(url, {responseType: 'arraybuffer'})
-
-        let filePath = `${this.settingsService.appSettings.imageSaveLocation}${orthancId}.zip`;
-        let outPath = `${this.settingsService.appSettings.imageSaveLocation}${orthancId}`;
-        fs.writeFileSync(filePath, study.data);
-
-        await new Promise((resolve, reject) => {
-            let unzipped = fs.createReadStream(filePath).pipe(unzip.Extract({path: outPath}))
-
-            unzipped.on('finish', resolve);
-            unzipped.on('error', reject);
-        })
-
-        return orthancId;
-    }
-
 
     async registerModel(modelVM: ModelViewModel): Promise<ModelViewModel> {
         let model = this.aiFactory.buildModel(modelVM);
+        let evalJob = this.aiFactory.buildEvalJob(model, false)
 
-        let savedModel = await this.modelRepository.save(model);
 
         try {
             let container = await this.docker.createContainer({
@@ -104,6 +87,9 @@ export class AiService {
         } catch {
             throw new Error('Can\'t find image');
         }
+
+        let savedModel = await this.modelRepository.save(model);
+        await this.jobRepository.save(evalJob)
 
         return this.aiFactory.buildModelViewModel(savedModel);
     }
@@ -119,28 +105,37 @@ export class AiService {
         return this.evalRepository.save(study)
     }
 
-    async getStudies(page: string, pageSize: string): Promise<{studies: Study[], total: number}> {
+    async getStudies(page: string, pageSize: string, searchString: string): Promise<{studies: Study[], total: number}> {
         let studies = await this.studyRepository.findAndCount({
             skip: +page,
-            take: +pageSize
-        });
+            take: +pageSize,
+            where: [
+                {patientId: Like(`%${searchString}%`)},
+                {orthancStudyId: Like(`%${searchString}%`)},
+                {type: Like(`%${searchString}%`)},
+            ]
+        }, );
+
         return {studies: studies[0], total: studies[1]};
     }
 
-    async getEvals(page: number, pageSize: number): Promise<{evals: StudyEvaluation[], total: number}> {
-        let evals = await this.evalRepository.findAndCount({
-            relations: ['model', 'study'],
-            skip: page,
-            take: pageSize
-        });
+    async getEvals(page: number, pageSize: number, searchString: string): Promise<{evals: StudyEvaluation[], total: number}> {
+        let query = this.evalRepository.createQueryBuilder('eval')
+        .innerJoinAndSelect('eval.study', 'study')
+        .innerJoinAndSelect('eval.model', 'model')
+        .where('study.patientId like :patientId', {patientId: `%${searchString}%`})
+        .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
+        .skip(page)
+        .take(pageSize)
+
+        let evals = await query.getManyAndCount()
+
         return {evals: evals[0], total: evals[1]}
     }
 
-    async startJob(jobVM: EvalJobViewModel): Promise<EvalJobViewModel> {
-        let job = this.aiFactory.buildEvalJob(jobVM) 
-        let jobDB = await this.jobRepository.save(job)
-        let model = await this.modelRepository.findOneOrFail({id: job.model as number})
-        return this.aiFactory.buildEvalJobVM(jobDB, model)
+    async startJob(jobId: number): Promise<{updated: number}> {
+        let jobDB = await this.jobRepository.update({id: jobId}, {running: true})
+        return { updated: jobDB.affected }
     }
 
     async getImages(): Promise<string[]> {
@@ -159,16 +154,45 @@ export class AiService {
 
     async killJob(jobId): Promise<EvalJob> {
         let job = await this.jobRepository.findOneOrFail({id: jobId});
-        job.status = EvalJobStatus.stopped;
+        job.running = false;
         return await this.jobRepository.save(job);
     }
 
     async setClassifier(modelName:string): Promise<ModelViewModel> {
-        let classifier = await this.modelRepository.findOne({image: modelName});
+        let classifier = await this.classifierRepository.findOne();
+        let model = await this.modelRepository.findOne({image: modelName})
+
+        if(!model) {
+
+            let dbModel: ModelViewModel = {image: modelName, input: StudyType.dicom, output: ModelOutputs.studyType, hasImageOutput: false}
+            model = await this.modelRepository.save(this.aiFactory.buildModel(dbModel))
+        } 
 
         if(!classifier) {
-            await this.modelRepository.save(this.aiFactory.buildModel({image: modelName, input: StudyType.di}))
+            let classifer = this.aiFactory.buildClassifier(model);
+            await this.classifierRepository.save(classifer);
+        } else {
+            await this.classifierRepository.update({ id: classifier.id }, { model })
         }
 
+        return this.aiFactory.buildModelViewModel(model);
+    }
+
+    async getClassifier() {
+        let classifier = await this.classifierRepository.findOne();
+        return {image: classifier.model.image}
+    }
+
+    async getOrthancStudyCount() {
+        let studies = await axios.get(`${this.settingsService.getOrthancUrl()}/studies`)
+
+        return {count: studies.data.length}
+    }
+
+    async getOutputImage(evalId: number) {
+        let evaluation = await this.evalRepository.findOne({id:evalId})
+        console.log('image path is ', evaluation.imgOutputPath)
+
+        return evaluation.imgOutputPath;
     }
 }

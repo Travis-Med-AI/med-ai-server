@@ -19,4 +19,7 @@ export class Model {
 
     @Column()
     output: ModelOutputs
+
+    @Column()
+    hasImageOutput: boolean
 }

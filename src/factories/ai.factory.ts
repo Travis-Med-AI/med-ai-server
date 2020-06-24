@@ -3,9 +3,8 @@ import { ModelViewModel } from '../interfaces/ModelViewModel';
 import { Model } from '../entity/Model.entity';
 import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
 import { EvaluationStatus } from '../enums/EvaluationStatus';
-import { EvalJobViewModel } from '../interfaces/EvalJobViewModel';
 import { EvalJob } from '../entity/EvalJob.entity';
-import { EvalJobStatus } from '../enums/EvalJobStatus';
+import { Classifier } from '../entity/Classifier.entity';
 
 @injectable()
 export class AiFactory {
@@ -17,6 +16,7 @@ export class AiFactory {
         model.image = image;
         model.input = input; 
         model.output = output; 
+        model.hasImageOutput = modelVM.hasImageOutput
 
         return model;
     }
@@ -26,7 +26,8 @@ export class AiFactory {
             id: model.id,
             image: model.image,
             input: model.input,
-            output: model.output
+            output: model.output,
+            hasImageOutput: model.hasImageOutput
         }
     }
 
@@ -40,20 +41,20 @@ export class AiFactory {
         return study
     }
 
-    buildEvalJob(jobVM: EvalJobViewModel): EvalJob {
+    buildEvalJob(model: Model, running: boolean): EvalJob {
         let job = new EvalJob();
-        job.endTime = jobVM.endTime;
-        job.model = jobVM.model.id;
-        job.status = EvalJobStatus.running;
+        job.model = model;
+        job.running = running
 
         return job;
     }
 
-    buildEvalJobVM(job:EvalJob, model: Model): EvalJobViewModel {
-        return {
-            ...job,
-            model: this.buildModelViewModel(model)
-        }
+
+    buildClassifier(model: Model) {
+        let classifer = new Classifier();
+        classifer.model = model;
+
+        return classifer;
     }
 
 }

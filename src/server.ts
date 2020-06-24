@@ -9,6 +9,7 @@ import { TYPES } from './constants/types';
 import jwt from 'express-jwt';
 import { APP_SETTINGS } from './constants/appSettings';
 import cors from 'cors';
+import express from 'express'
 
 const configServer = (app) => {
     app.use(bodyParser.urlencoded({
@@ -16,6 +17,7 @@ const configServer = (app) => {
     }));
     app.use(bodyParser.json());
     app.use(cors())
+    app.use('/static', express.static('/tmp'))
 }
 
 const configError = (app) => {

@@ -11,7 +11,7 @@ export class StudyEvaluation {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => Study)
+    @ManyToOne(type => Study, study => study.patientId, {eager: true})
     @JoinColumn()
     study: number;
 
@@ -24,6 +24,9 @@ export class StudyEvaluation {
 
     @Column()
     status: EvaluationStatus
+
+    @Column({nullable: true})
+    imgOutputPath: string
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastUpdate: number;
