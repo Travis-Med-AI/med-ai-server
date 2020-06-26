@@ -6,9 +6,12 @@ import { DatabaseService } from "./services/database.service";
 import { AuthMiddleware } from "./middleware/auth.middleware";
 import { AdminMiddleware } from "./middleware/role.middleware";
 import { AiFactory } from "./factories/ai.factory";
-import { AiService } from './services/ai.service';
 import { AppSettings } from "./interfaces/AppSettings";
 import { AppSettingsService } from "./services/appSettings.service";
+import { EvalService } from "./services/eval.service";
+import { JobService } from "./services/job.service";
+import { ModelService } from "./services/model.service";
+import { StudyService } from "./services/study.service";
 
 export let container = new Container();
 
@@ -20,7 +23,11 @@ container.bind<UserService>(TYPES.UserService).to(UserService);
 container.bind<AuthMiddleware>(TYPES.AuthMiddleware).to(AuthMiddleware);
 container.bind<AdminMiddleware>(TYPES.AdminMiddleware).to(AdminMiddleware);
 
-container.bind<AiService>(TYPES.AiService).to(AiService);
 container.bind<AiFactory>(TYPES.AiFatory).to(AiFactory);
+
+container.bind<EvalService>(TYPES.EvalService).to(EvalService);
+container.bind<JobService>(TYPES.JobService).to(JobService);
+container.bind<ModelService>(TYPES.ModelService).to(ModelService);
+container.bind<StudyService>(TYPES.StudyService).to(StudyService);
 
 container.bind<AppSettingsService>(TYPES.AppSettingsService).to(AppSettingsService);

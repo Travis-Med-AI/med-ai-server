@@ -1,17 +1,6 @@
 version: '3.5'
 services:
-    postgres-db:
-        build:
-            context: .
-            dockerfile: ./dockerfiles/postgres.dockerfile
-        volumes:
-            - postgres-volume:/var/lib/postgresql/data
-        environment:
-            - POSTGRES_DB=ai
-            - POSTGRES_USER=test
-            - POSTGRES_PASSWORD=test
-        ports:
-            - "5432:5432"
+
 
     server:
         build:
@@ -20,8 +9,6 @@ services:
         restart: unless-stopped
         ports:
             - 8000:8000
-        depends_on: 
-            - postgres-db
         environment: 
             - ORTHANC_HOST=orthanc
             - REDIS_HOST=redis
@@ -30,8 +17,7 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
             - ai-images:/tmp
 volumes:
-    postgres-volume:
-        name: postgres-volume
+
     ai-images:
         external:
             name: ai-images
