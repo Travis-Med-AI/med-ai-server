@@ -6,6 +6,8 @@ import * as _ from 'lodash';
 import { ModelService } from "../services/model.service";
 import { ModelViewModel } from "../interfaces/ModelViewModel";
 import { Response } from "express";
+import { Modality } from "../enums/Modality";
+import { Classifier } from "../entity/Classifier.entity";
 
 
 @controller('/models')
@@ -28,13 +30,13 @@ export class ModelController {
     }
 
     @httpPost('/classifier')
-    public async setClassifier(req: CutsomRequest<{image: string}>, res: Response): Promise<ModelViewModel> {
-        return this.modelService.setClassifier(req.body.image);
+    public async setClassifier(req: CutsomRequest<{image: string, modality: Modality}>, res: Response): Promise<ModelViewModel> {
+        return this.modelService.setClassifier(req.body.image, req.body.modality);
     }
 
-    @httpGet('/classifier')
-    public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<{image: string}> {
-        return this.modelService.getClassifier();
+    @httpGet('/classifiers')
+    public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<Classifier[]> {
+        return this.modelService.getClassifiers();
     }
 
 }

@@ -1,6 +1,8 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
 import { ModelOutputs } from "../enums/ModelOutputs";
 import { StudyType } from "../enums/StudyType";
+import { ModelInputs } from "../enums/ModelInputs";
+import { Modality } from "../enums/Modality";
 
 @Entity()
 export class Model {
@@ -12,14 +14,17 @@ export class Model {
     image: string;
 
     @Column()
-    input: StudyType
+    input: StudyType;
+
+    @Column()
+    modality: Modality;
 
     @Column({nullable: true})
-    inputType: StudyType
+    inputType: ModelInputs;
 
     @Column()
-    output: ModelOutputs
+    output: ModelOutputs;
 
     @Column()
-    hasImageOutput: boolean
+    hasImageOutput: boolean;
 }

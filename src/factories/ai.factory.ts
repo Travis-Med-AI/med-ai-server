@@ -10,13 +10,15 @@ import { Classifier } from '../entity/Classifier.entity';
 export class AiFactory {
 
     buildModel(modelVM: ModelViewModel): Model {
-        let { image, input, output } = modelVM;
+        let { image, input, output, inputType } = modelVM;
 
         let model = new Model();
         model.image = image;
         model.input = input; 
+        model.inputType = inputType; 
         model.output = output; 
         model.hasImageOutput = modelVM.hasImageOutput
+        model.modality = modelVM.modality
 
         return model;
     }
@@ -27,11 +29,13 @@ export class AiFactory {
             image: model.image,
             input: model.input,
             output: model.output,
-            hasImageOutput: model.hasImageOutput
+            hasImageOutput: model.hasImageOutput,
+            inputType: model.inputType,
+            modality: model.modality
         }
     }
 
-    buildStudy(modelId: number, studyId: number, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
+    buildStudyEval(modelId: number, studyId: number, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
         let study = new StudyEvaluation();
         study.model = modelId;
         study.study = studyId;
@@ -53,6 +57,7 @@ export class AiFactory {
     buildClassifier(model: Model) {
         let classifer = new Classifier();
         classifer.model = model;
+        classifer.modality = model.modality
 
         return classifer;
     }

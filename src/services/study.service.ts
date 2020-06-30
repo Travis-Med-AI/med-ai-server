@@ -31,6 +31,7 @@ export class StudyService {
                 {patientId: Like(`%${searchString}%`)},
                 {orthancStudyId: Like(`%${searchString}%`)},
                 {type: Like(`%${searchString}%`)},
+                {modality: Like(`%${searchString}%`)},
             ]
         }, );
 

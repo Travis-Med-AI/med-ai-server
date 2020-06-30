@@ -16,7 +16,10 @@ export class Study {
     patientId: string;
 
     @Column('text', {nullable: true})
-    type: StudyType;
+    type: StudyType;    
+    
+    @Column( {nullable: true})
+    modality: string;
 
     @Column({default: () => false})
     failed: boolean;

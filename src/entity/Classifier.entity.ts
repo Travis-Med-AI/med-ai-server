@@ -1,4 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique} from "typeorm";
 import { EvalJobStatus } from "../enums/EvalJobStatus";
 import { Model } from "./Model.entity";
 
@@ -11,6 +11,9 @@ export class Classifier {
     @ManyToOne(type => Model, {eager: true})
     @JoinColumn()
     model: Model;
+
+    @Column({unique: true})
+    modality: string;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastRun: number;

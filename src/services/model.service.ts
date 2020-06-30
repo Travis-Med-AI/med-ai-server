@@ -10,6 +10,8 @@ import { ModelOutputs } from "../enums/ModelOutputs";
 import { JobService } from "./job.service";
 import { AiFactory } from "../factories/ai.factory";
 import * as _ from 'lodash';
+import { ModelInputs } from "../enums/ModelInputs";
+import { Modality } from "../enums/Modality";
 
 @injectable()
 export class ModelService {
@@ -57,13 +59,20 @@ export class ModelService {
         return models.map(m => this.aiFactory.buildModelViewModel(m));
     }
 
-    async setClassifier(modelName:string): Promise<ModelViewModel> {
-        let classifier = await this.classifierRepository.findOne();
-        let model = await this.modelRepository.findOne({image: modelName})
+    async setClassifier(modelName:string, modality: Modality): Promise<ModelViewModel> {
+        let classifier = await this.classifierRepository.findOne({modality});
+        let model = await this.modelRepository.findOne({image: modelName, modality})
 
         if(!model) {
 
-            let dbModel: ModelViewModel = {image: modelName, input: StudyType.dicom, output: ModelOutputs.studyType, hasImageOutput: false}
+            let dbModel: ModelViewModel = {
+                image: modelName, 
+                input: StudyType.dicom, 
+                output: ModelOutputs.studyType, 
+                hasImageOutput: false, 
+                inputType: ModelInputs.DICOM,
+                modality
+            }
             model = await this.modelRepository.save(this.aiFactory.buildModel(dbModel))
         } 
 
@@ -77,9 +86,9 @@ export class ModelService {
         return this.aiFactory.buildModelViewModel(model);
     }
     
-    async getClassifier() {
-        let classifier = await this.classifierRepository.findOne();
-        return {image: classifier.model.image}
+    async getClassifiers() {
+        let classifiers = await this.classifierRepository.find();
+        return classifiers;
     }
 
     async getImages(): Promise<string[]> {

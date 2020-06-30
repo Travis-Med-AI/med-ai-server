@@ -21,7 +21,7 @@ export class EvalService {
     ) {}
 
     async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
-        let study = this.aiFactory.buildStudy(modelId, studyId, EvaluationStatus.running);
+        let study = this.aiFactory.buildStudyEval(modelId, studyId, EvaluationStatus.running);
         
         return this.evalRepository.save(study)
     }
@@ -32,6 +32,7 @@ export class EvalService {
         .innerJoinAndSelect('eval.model', 'model')
         .where('study.patientId like :patientId', {patientId: `%${searchString}%`})
         .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
+        .orWhere('eval."modelOutput"::TEXT like :output', {output: `%${searchString}%`})
         .skip(page)
         .take(pageSize)
 
