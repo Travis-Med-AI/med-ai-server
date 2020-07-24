@@ -12,6 +12,7 @@ import { EvalService } from "./services/eval.service";
 import { JobService } from "./services/job.service";
 import { ModelService } from "./services/model.service";
 import { StudyService } from "./services/study.service";
+import { MonitorSerivice } from "./services/monitor.service";
 
 export let container = new Container();
 
@@ -29,5 +30,7 @@ container.bind<EvalService>(TYPES.EvalService).to(EvalService);
 container.bind<JobService>(TYPES.JobService).to(JobService);
 container.bind<ModelService>(TYPES.ModelService).to(ModelService);
 container.bind<StudyService>(TYPES.StudyService).to(StudyService);
+
+container.bind<MonitorSerivice>(TYPES.MonitorService).to(MonitorSerivice);
 
 container.bind<AppSettingsService>(TYPES.AppSettingsService).to(AppSettingsService);

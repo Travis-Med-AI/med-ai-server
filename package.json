@@ -30,8 +30,10 @@
     "mongodb": "^3.3.2",
     "morgan": "^1.9.1",
     "node-docker-api": "^1.1.22",
+    "os-utils": "0.0.14",
     "pg": "^7.3.0",
     "reflect-metadata": "^0.1.10",
+    "systeminformation": "^4.26.10",
     "typeorm": "0.2.25",
     "typescript": "^3.6.4",
     "unzipper": "^0.10.11"

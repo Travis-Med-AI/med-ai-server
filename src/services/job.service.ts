@@ -18,7 +18,11 @@ export class JobService {
     ) {}
 
     async getEvalJobs(): Promise<EvalJob[]> {
-        let evalJobs = await this.jobRepository.find({relations: ['model']});
+        let evalJobs = await this.jobRepository.find({
+            relations: ['model'],     
+            order: {
+                id: "ASC",
+        }});
 
         return evalJobs
     }

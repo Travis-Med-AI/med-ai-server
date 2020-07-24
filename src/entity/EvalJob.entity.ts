@@ -12,6 +12,9 @@ export class EvalJob {
     @JoinColumn()
     model: number | Model
 
+    @Column({default: 1})
+    batchSize: number;
+
     @Column()
     running: boolean;
 

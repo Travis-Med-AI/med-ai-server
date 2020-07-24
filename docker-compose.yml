@@ -1,18 +1,18 @@
-version: '3.5'
+version: '2.3'
 services:
-
-
     server:
         build:
             context: .
             dockerfile: ./Dockerfile
         restart: unless-stopped
+        runtime: nvidia
         ports:
             - 8000:8000
         environment: 
             - ORTHANC_HOST=orthanc
             - REDIS_HOST=redis
             - RABBITMQ_HOST=rabbitmq
+            - NVIDIA_VISIBLE_DEVICES=all
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ai-images:/tmp

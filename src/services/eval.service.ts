@@ -33,6 +33,7 @@ export class EvalService {
         .where('study.patientId like :patientId', {patientId: `%${searchString}%`})
         .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
         .orWhere('eval."modelOutput"::TEXT like :output', {output: `%${searchString}%`})
+        .orderBy('study.patientId', 'ASC')
         .skip(page)
         .take(pageSize)
 
