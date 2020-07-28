@@ -5,13 +5,14 @@ import { Model } from "../entity/Model.entity";
 import { ModelViewModel } from "../interfaces/ModelViewModel";
 import Docker from "dockerode";
 import { Classifier } from "../entity/Classifier.entity";
-import { StudyType } from "../enums/StudyType";
-import { ModelOutputs } from "../enums/ModelOutputs";
 import { JobService } from "./job.service";
 import { AiFactory } from "../factories/ai.factory";
 import * as _ from 'lodash';
-import { ModelInputs } from "../enums/ModelInputs";
 import { Modality } from "../enums/Modality";
+import { ModelManifestItem } from "../interfaces/ModelManifestItem";
+import { ModelManifest } from "../constants/model.manifest";
+import  {exec} from 'child_process'
+import {promisify} from 'util';
 
 @injectable()
 export class ModelService {
@@ -30,28 +31,27 @@ export class ModelService {
         return this.modelRepository.findOne({id: modelId});
     }
 
-    async saveModel(model:Model): Promise<Model> {
-
-        return 
+    async registerModel(modelManifest: ModelManifestItem): Promise<ModelViewModel> {
+        let savedModel = await this.saveModel(modelManifest);
+        return this.aiFactory.buildModelViewModel(savedModel);
     }
 
-    async registerModel(modelVM: ModelViewModel): Promise<ModelViewModel> {
-        let model = this.aiFactory.buildModel(modelVM);
-        let evalJob = this.aiFactory.buildEvalJob(model, false)
+    async saveModel(modelManifest: ModelManifestItem): Promise<Model> {
+        let model = this.aiFactory.buildModel(modelManifest);
 
-        try {
-            let container = await this.docker.createContainer({
-                Image: model.image,
-            });
-        } catch {
-            throw new Error('Can\'t find image');
-        }
+        // pull image from dockerhub
+        exec(`docker pull ${model.image}`, (error, stdout, stderr) => {
+            if(error){
+                this.modelRepository.update({image: model.image}, {pulled: false, failed: true})
+            } else {
+                this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
+            }
+        })
 
         let savedModel = await this.modelRepository.save(model);
 
         await this.jobService.saveEvalJob(model)
-
-        return this.aiFactory.buildModelViewModel(savedModel);
+        return savedModel
     }
 
     async getModels(): Promise<ModelViewModel[]> {
@@ -63,17 +63,9 @@ export class ModelService {
         let classifier = await this.classifierRepository.findOne({modality});
         let model = await this.modelRepository.findOne({image: modelName, modality})
 
-        if(!model) {
-
-            let dbModel: ModelViewModel = {
-                image: modelName, 
-                input: StudyType.dicom, 
-                output: ModelOutputs.studyType, 
-                hasImageOutput: false, 
-                inputType: ModelInputs.DICOM,
-                modality
-            }
-            model = await this.modelRepository.save(this.aiFactory.buildModel(dbModel))
+        if(model == undefined) {
+            let manifestItem = _.find(ModelManifest, m => m.tag === modelName)
+            model = await this.saveModel(manifestItem)
         } 
 
         if(!classifier) {
@@ -99,4 +91,11 @@ export class ModelService {
         return Array.from(set);
     }
 
+    async getDownloadableModels (): Promise<ModelManifestItem[]> {
+        let models = await this.modelRepository.find()
+
+        let filteredManifest = _.filter(ModelManifest, mm => _.findIndex(models, (m:Model) => m.image === mm.tag) === -1)
+
+        return filteredManifest;
+    }
 }

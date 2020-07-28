@@ -27,12 +27,11 @@ export class StudyService {
         let studies = await this.studyRepository.findAndCount({
             skip: +page,
             take: +pageSize,
-            where: [
-                {patientId: Like(`%${searchString}%`)},
-                {orthancStudyId: Like(`%${searchString}%`)},
-                {type: Like(`%${searchString}%`)},
-                {modality: Like(`%${searchString}%`)},
-            ]
+            where: `"patientId" ILIKE '%${searchString}%'
+                OR "orthancStudyId" ILIKE '%${searchString}%'
+                OR "type" ILIKE '%${searchString}%'
+                OR "modality" ILIKE '%${searchString}%'
+            ` 
         }, );
 
         return {studies: studies[0], total: studies[1]};

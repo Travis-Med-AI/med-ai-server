@@ -3,5 +3,7 @@ export enum StudyType {
     frontalCXR = "Frontal_CXR", 
     lateralCXR = "Lateral_CXR", 
     mskCXR = "MSK_Xray",
-    dicom = "Dicom"
+    dicom = "Dicom",
+    headCT= 'Head_CT',
+    CT = 'CT'
 }

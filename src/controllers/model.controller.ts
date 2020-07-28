@@ -8,6 +8,7 @@ import { ModelViewModel } from "../interfaces/ModelViewModel";
 import { Response } from "express";
 import { Modality } from "../enums/Modality";
 import { Classifier } from "../entity/Classifier.entity";
+import { ModelManifestItem } from "../interfaces/ModelManifestItem";
 
 
 @controller('/models')
@@ -24,8 +25,13 @@ export class ModelController {
         return this.modelService.getImages();
     }
 
+    @httpGet('/available')
+    public async getDownloadableImages(req: CutsomRequest<any>, res: Response): Promise<ModelManifestItem[]> {
+        return this.modelService.getDownloadableModels();
+    }
+
     @httpPost('/register')
-    public async registerModel(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
+    public async registerModel(req: CutsomRequest<ModelManifestItem>, res: Response): Promise<ModelViewModel> {
         return this.modelService.registerModel(req.body)
     }
 

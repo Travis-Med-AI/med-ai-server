@@ -5,15 +5,17 @@ import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
 import { EvaluationStatus } from '../enums/EvaluationStatus';
 import { EvalJob } from '../entity/EvalJob.entity';
 import { Classifier } from '../entity/Classifier.entity';
+import { ModelManifestItem } from '../interfaces/ModelManifestItem';
 
 @injectable()
 export class AiFactory {
 
-    buildModel(modelVM: ModelViewModel): Model {
-        let { image, input, output, inputType } = modelVM;
+    buildModel(modelVM: ModelManifestItem): Model {
+        let { tag, input, output, inputType, displayName } = modelVM;
 
         let model = new Model();
-        model.image = image;
+        model.image = tag;
+        model.displayName = displayName;
         model.input = input; 
         model.inputType = inputType; 
         model.output = output; 

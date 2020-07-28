@@ -13,6 +13,9 @@ export class Model {
     @Column({unique: true})
     image: string;
 
+    @Column({unique: true})
+    displayName: string;
+
     @Column()
     input: StudyType;
 
@@ -27,4 +30,10 @@ export class Model {
 
     @Column()
     hasImageOutput: boolean;
+
+    @Column({default: false})
+    pulled: boolean;
+
+    @Column({default: false})
+    failed: boolean;
 }
