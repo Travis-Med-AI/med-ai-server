@@ -11,8 +11,8 @@ import * as _ from 'lodash';
 import { Modality } from "../enums/Modality";
 import { ModelManifestItem } from "../interfaces/ModelManifestItem";
 import { ModelManifest } from "../constants/model.manifest";
-import  {exec} from 'child_process'
-import {promisify} from 'util';
+import { spawn } from 'child_process'
+import { createInterface } from 'readline';
 
 @injectable()
 export class ModelService {
@@ -39,19 +39,32 @@ export class ModelService {
     async saveModel(modelManifest: ModelManifestItem): Promise<Model> {
         let model = this.aiFactory.buildModel(modelManifest);
 
-        // pull image from dockerhub
-        exec(`docker pull ${model.image}`, (error, stdout, stderr) => {
-            if(error){
-                this.modelRepository.update({image: model.image}, {pulled: false, failed: true})
-            } else {
-                this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
-            }
-        })
+        try {
+            // pull image from dockerhub
+            let pull = spawn(`docker`, ['pull', model.image])
 
-        let savedModel = await this.modelRepository.save(model);
+            createInterface({input: pull.stdout, terminal:false})
+                .on('line', line => console.log(line))
 
-        await this.jobService.saveEvalJob(model)
-        return savedModel
+            pull.stderr.on('data', (data) => console.warn(data))
+            pull.on('exit', (code) => {
+                console.log(`Pull exited with code ${code}`);
+                if(!code) {
+                    //if exit code is is 0 then it succeeded
+                    this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
+                } else {
+                    //if exit code is is 0 then it failed
+                    this.modelRepository.update({image: model.image}, {pulled: false, failed: true})
+                }
+            })
+            let savedModel = await this.modelRepository.save(model);
+
+            await this.jobService.saveEvalJob(model)
+            return savedModel
+        } catch (e) {
+            throw new Error(e)
+        }
+
     }
 
     async getModels(): Promise<ModelViewModel[]> {
@@ -97,5 +110,11 @@ export class ModelService {
         let filteredManifest = _.filter(ModelManifest, mm => _.findIndex(models, (m:Model) => m.image === mm.tag) === -1)
 
         return filteredManifest;
+    }
+
+    async retryModelDownload(image: string): Promise<ModelViewModel> {
+        let manifest = _.find(ModelManifest, mi => mi.tag === image);
+
+        return this.registerModel(manifest)
     }
 }

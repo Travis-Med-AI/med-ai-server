@@ -35,6 +35,11 @@ export class ModelController {
         return this.modelService.registerModel(req.body)
     }
 
+    @httpPost('/retry')
+    public async retryDownload(req: CutsomRequest<{image: string}>, res: Response): Promise<ModelViewModel> {
+        return this.modelService.retryModelDownload(req.body.image)
+    }
+
     @httpPost('/classifier')
     public async setClassifier(req: CutsomRequest<{image: string, modality: Modality}>, res: Response): Promise<ModelViewModel> {
         return this.modelService.setClassifier(req.body.image, req.body.modality);
