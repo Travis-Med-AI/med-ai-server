@@ -11,7 +11,7 @@ import * as _ from 'lodash';
 import { Modality } from "../enums/Modality";
 import { ModelManifestItem } from "../interfaces/ModelManifestItem";
 import { ModelManifest } from "../constants/model.manifest";
-import { spawn } from 'child_process'
+import { exec } from 'child_process'
 import { createInterface } from 'readline';
 
 @injectable()
@@ -41,22 +41,17 @@ export class ModelService {
 
         try {
             // pull image from dockerhub
-            let pull = spawn(`docker`, ['pull', model.image])
-
-            createInterface({input: pull.stdout, terminal:false})
-                .on('line', line => console.log(line))
-
-            pull.stderr.on('data', (data) => console.warn(data))
-            pull.on('exit', (code) => {
-                console.log(`Pull exited with code ${code}`);
-                if(!code) {
-                    //if exit code is is 0 then it succeeded
-                    this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
-                } else {
-                    //if exit code is is 0 then it failed
+            let pull = exec(`docker pull ${model.image}`, (err, stdout) => {
+                if(err) {
+                    console.warn(err)
                     this.modelRepository.update({image: model.image}, {pulled: false, failed: true})
+                } else {
+                    console.log(stdout)
+                    this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
                 }
+
             })
+
             let savedModel = await this.modelRepository.save(model);
 
             await this.jobService.saveEvalJob(model)
@@ -114,7 +109,6 @@ export class ModelService {
 
     async retryModelDownload(image: string): Promise<ModelViewModel> {
         let manifest = _.find(ModelManifest, mi => mi.tag === image);
-
         return this.registerModel(manifest)
     }
 }
