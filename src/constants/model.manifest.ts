@@ -31,5 +31,14 @@ export const ModelManifest: ModelManifestItem[] = [
         inputType: ModelInputs.DICOM,
         output: ModelOutputs.classProbabilities,
         hasImageOutput: true
+    },    
+    {
+        tag: 'tclarke104/pneumonia-model:0.1',
+        displayName: 'Pneumonia Detection',
+        input: StudyType.frontalCXR,
+        modality: Modality.C_XRAY,
+        inputType: ModelInputs.DICOM,
+        output: ModelOutputs.classProbabilities,
+        hasImageOutput: true
     },
 ]
