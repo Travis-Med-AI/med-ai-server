@@ -9,7 +9,10 @@ import { TYPES } from './constants/types';
 import jwt from 'express-jwt';
 import { APP_SETTINGS } from './constants/appSettings';
 import cors from 'cors';
-import express from 'express'
+import express from 'express';
+import log4js, { Logger } from 'log4js';
+
+
 
 const configServer = (app) => {
     app.use(bodyParser.urlencoded({
@@ -27,8 +30,31 @@ const configError = (app) => {
     });
 }
 
+const setUpLogging = () => {
+    log4js.configure({
+        appenders: {
+          logstash: {
+            type: '@log4js-node/logstashudp',
+            host: 'localhost',
+            port: 5000
+          }
+        },
+        categories: {
+          default: { appenders: ['logstash'], level: 'info' }
+        }
+      });
+    const logger = log4js.getLogger();
+
+    logger.info('setting up server')
+
+    container.bind<Logger>(TYPES.Logger).toConstantValue(logger);
+}
+
 createConnection().then(connection => {
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
+
+    setUpLogging();
+    
     let server = new InversifyExpressServer(container);
 
     server.setConfig(configServer)

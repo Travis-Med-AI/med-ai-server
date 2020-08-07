@@ -7,6 +7,7 @@ import axios from 'axios';
 import * as Celery from 'celery-ts';
 import { AppSettingsService } from "./appSettings.service";
 import { Like } from "typeorm";
+import { Logger } from "log4js";
 
 
 @injectable()
@@ -15,6 +16,7 @@ export class StudyService {
 
     constructor(
         @inject(TYPES.DatabaseService) private db: DatabaseService,
+        @inject(TYPES.Logger) private logger: Logger,
         @inject(TYPES.AppSettingsService) private settingsService: AppSettingsService
     ) {}
 
@@ -33,6 +35,8 @@ export class StudyService {
                 OR "modality" ILIKE '%${searchString}%'
             ` 
         }, );
+
+        this.logger.info('getting studies')
 
         return {studies: studies[0], total: studies[1]};
     }

@@ -17,6 +17,7 @@ export const TYPES = {
     StudyService: Symbol.for('StudyService'),
 
     MonitorService: Symbol.for('MonitorService'),
+    Logger: Symbol.for('Logger'),
 
     AppSettingsService: Symbol.for('AppSettingsService')
 }
