@@ -1,5 +1,5 @@
 import { injectable, inject } from "inversify";
-import { Connection, createConnection, Repository } from "typeorm";
+import { Connection, Repository } from "typeorm";
 import { TYPES } from "../constants/types";
 import * as Celery from 'celery-ts';
 import { AppSettingsService } from "./appSettings.service";

@@ -2,7 +2,7 @@ import { BaseMiddleware } from 'inversify-express-utils';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../constants/types';
 import { DatabaseService } from '../services/database.service';
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { CutsomRequest } from '../interfaces/Request';
 import { User } from '../entity/User.entity';
 import jwt from "jsonwebtoken";

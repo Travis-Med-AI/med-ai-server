@@ -1,6 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToMany} from "typeorm";
-import { User } from "./User.entity";
-import { ROLES } from "../enums/roles";
+import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import { ROLES } from "med-ai-common";
 
 @Entity()
 export class Role {

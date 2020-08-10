@@ -3,9 +3,7 @@ import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
 import  {exec} from 'child_process'
 import {promisify} from 'util';
-import { GpuInfo } from "../interfaces/GpuInfo";
-import { RamInfo } from "../interfaces/RamInfo";
-import { CpuInfo } from "../interfaces/CpuInfo";
+import { GpuInfoViewModel, RamInfoViewModel, CpuInfoViewModel } from "med-ai-common";
 import si from 'systeminformation';
 import os from 'os-utils';
 const execAsync = promisify(exec);
@@ -16,7 +14,7 @@ export class MonitorSerivice {
         @inject(TYPES.DatabaseService) private db: DatabaseService,
     ) {}
 
-    async getGPUInfo(): Promise<GpuInfo> {
+    async getGPUInfo(): Promise<GpuInfoViewModel> {
         const temp = await this.queryNvidia('temperature.gpu');
         const totalMemory = await this.queryNvidia('memory.total');
         const freeMemory = await this.queryNvidia('memory.free');
@@ -37,9 +35,9 @@ export class MonitorSerivice {
         return output.stdout
     }
 
-    async getCpuInfo(): Promise<CpuInfo> {
+    async getCpuInfo(): Promise<CpuInfoViewModel> {
         let temp = await si.cpuTemperature()
-        return  new Promise<CpuInfo>((resolve, reject) => {
+        return  new Promise<CpuInfoViewModel>((resolve, reject) => {
             let threads = os.cpuCount();
             os.cpuFree((val) => {
                 resolve({
@@ -52,7 +50,7 @@ export class MonitorSerivice {
         })
     }
 
-    getRamInfo(): RamInfo {
+    getRamInfo(): RamInfoViewModel {
         return {
             used: os.freemem(),
             total: os.totalmem()

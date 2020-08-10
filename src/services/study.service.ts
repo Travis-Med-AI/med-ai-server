@@ -1,13 +1,14 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
-import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
 import { Study } from "../entity/Study.entity";
 import axios from 'axios';
-import * as Celery from 'celery-ts';
 import { AppSettingsService } from "./appSettings.service";
-import { Like } from "typeorm";
 import { Logger } from "log4js";
+import { PagedResponse, StudyViewModel } from "med-ai-common";
+import { StudyFactory } from "../factories/study.factory";
+import _ from 'lodash';
+import { ResponseFactory } from "../factories/response.factory";
 
 
 @injectable()
@@ -16,6 +17,8 @@ export class StudyService {
 
     constructor(
         @inject(TYPES.DatabaseService) private db: DatabaseService,
+        @inject(TYPES.StudyFactory) private studyFactory: StudyFactory,
+        @inject(TYPES.ResponseFactory) private responseFactory: ResponseFactory,
         @inject(TYPES.Logger) private logger: Logger,
         @inject(TYPES.AppSettingsService) private settingsService: AppSettingsService
     ) {}
@@ -25,7 +28,7 @@ export class StudyService {
         return `started task for model ${modelId}`
     }
 
-    async getStudies(page: string, pageSize: string, searchString: string): Promise<{studies: Study[], total: number}> {
+    async getStudies(page: string, pageSize: string, searchString: string): Promise<PagedResponse<StudyViewModel>> {
         let studies = await this.studyRepository.findAndCount({
             skip: +page,
             take: +pageSize,
@@ -36,9 +39,11 @@ export class StudyService {
             ` 
         }, );
 
-        this.logger.info('getting studies')
+        this.logger.info('getting studies');
 
-        return {studies: studies[0], total: studies[1]};
+        let studyViewModels = _.map(studies[0], study => this.studyFactory.buildStudyViewModel(study))
+
+        return this.responseFactory.buildPagedResponse(studyViewModels, studies[1])
     }
 
     async getOrthancStudyCount() {

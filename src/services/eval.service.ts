@@ -2,11 +2,13 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
 import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
-import { EvalJob } from "../entity/EvalJob.entity";
-import { EvaluationStatus } from "../enums/EvaluationStatus";
+import { EvaluationStatus, StudyEvalVM } from "med-ai-common";
 import { StudyService } from "./study.service";
 import { ModelService } from "./model.service";
-import { AiFactory } from "../factories/ai.factory";
+import { PagedResponse } from 'med-ai-common';
+import { EvalFactory } from "../factories/eval.factory";
+import { ResponseFactory } from "../factories/response.factory";
+import _ from 'lodash';
 
 
 @injectable()
@@ -17,16 +19,17 @@ export class EvalService {
         @inject(TYPES.DatabaseService) private db: DatabaseService,
         @inject(TYPES.StudyService) private studyService: StudyService,
         @inject(TYPES.ModelService) private modelService: ModelService,
-        @inject(TYPES.AiFatory) private aiFactory: AiFactory
+        @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
+        @inject(TYPES.ResponseFactory) private responseFactory: ResponseFactory,
     ) {}
 
     async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
-        let study = this.aiFactory.buildStudyEval(modelId, studyId, EvaluationStatus.running);
+        let study = this.evalFactory.buildStudyEval(modelId, studyId, EvaluationStatus.running);
         
         return this.evalRepository.save(study)
     }
 
-    async getEvals(page: number, pageSize: number, searchString: string): Promise<{evals: StudyEvaluation[], total: number}> {
+    async getEvals(page: number, pageSize: number, searchString: string): Promise<PagedResponse<StudyEvalVM>> {
         let query = this.evalRepository.createQueryBuilder('eval')
         .innerJoinAndSelect('eval.study', 'study')
         .innerJoinAndSelect('eval.model', 'model')
@@ -39,7 +42,9 @@ export class EvalService {
 
         let evals = await query.getManyAndCount()
 
-        return {evals: evals[0], total: evals[1]}
+        let studyEvalVMs = _.map(evals[0], e => this.evalFactory.buildStudyEvalViewModel(e))
+
+        return this.responseFactory.buildPagedResponse<StudyEvalVM>(evals[0], evals[1])
     }
 
     async getOutputImage(evalId: number) {

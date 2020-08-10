@@ -13,7 +13,7 @@ export const APP_SETTINGS: AppSettings = {
     },
     orthanc: {
         host: 'localhost',
-        port: 8043
+        port: 8042
     },
     imageSaveLocation: '/tmp/'
 }

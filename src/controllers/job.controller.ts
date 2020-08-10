@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { JobService } from "../services/job.service";
 import { EvalJob } from "../entity/EvalJob.entity";
 import { Response } from "express";
-
+import { EvalJobViewModel } from "med-ai-common";
 
 
 @controller('/jobs')
@@ -14,7 +14,7 @@ export class JobController {
     constructor(@inject(TYPES.JobService) private jobService: JobService) {}
 
     @httpGet('')
-    public async getEvalJobs(req: CutsomRequest<any>, res: Response): Promise<EvalJob[]> {
+    public async getEvalJobs(req: CutsomRequest<any>, res: Response): Promise<EvalJobViewModel[]> {
         return this.jobService.getEvalJobs();
     }
 
@@ -24,7 +24,7 @@ export class JobController {
     }
 
     @httpPost('/kill')
-    public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJob> {
+    public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJobViewModel> {
         return this.jobService.killJob(req.body.id);
     }
 }

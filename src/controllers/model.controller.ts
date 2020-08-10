@@ -4,11 +4,9 @@ import { TYPES } from "../constants/types";
 import { CutsomRequest } from "../interfaces/Request";
 import * as _ from 'lodash';
 import { ModelService } from "../services/model.service";
-import { ModelViewModel } from "../interfaces/ModelViewModel";
+import { ModelViewModel } from "med-ai-common";
 import { Response } from "express";
-import { Modality } from "../enums/Modality";
-import { Classifier } from "../entity/Classifier.entity";
-import { ModelManifestItem } from "../interfaces/ModelManifestItem";
+import { ModelManifestItem, ClassifierViewModel } from "med-ai-common";
 
 
 @controller('/models')
@@ -31,22 +29,22 @@ export class ModelController {
     }
 
     @httpPost('/register')
-    public async registerModel(req: CutsomRequest<ModelManifestItem>, res: Response): Promise<ModelViewModel> {
+    public async registerModel(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel> {
         return this.modelService.registerModel(req.body)
     }
 
     @httpPost('/retry')
-    public async retryDownload(req: CutsomRequest<{image: string}>, res: Response): Promise<ModelViewModel> {
+    public async retryDownload(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
         return this.modelService.retryModelDownload(req.body.image)
     }
 
     @httpPost('/classifier')
-    public async setClassifier(req: CutsomRequest<{image: string, modality: Modality}>, res: Response): Promise<ModelViewModel> {
+    public async setClassifier(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
         return this.modelService.setClassifier(req.body.image, req.body.modality);
     }
 
     @httpGet('/classifiers')
-    public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<Classifier[]> {
+    public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<ClassifierViewModel[]> {
         return this.modelService.getClassifiers();
     }
 

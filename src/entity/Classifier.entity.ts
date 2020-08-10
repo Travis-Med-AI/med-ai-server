@@ -1,5 +1,4 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique} from "typeorm";
-import { EvalJobStatus } from "../enums/EvalJobStatus";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from "typeorm";
 import { Model } from "./Model.entity";
 
 @Entity()

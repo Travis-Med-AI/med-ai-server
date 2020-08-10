@@ -1,6 +1,6 @@
 import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, Unique} from "typeorm";
 import { Model } from "./Model.entity";
-import { EvaluationStatus } from "../enums/EvaluationStatus";
+import { EvaluationStatus } from "med-ai-common";
 import { Study } from "./Study.entity";
 
 

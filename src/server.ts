@@ -6,12 +6,10 @@ import { container } from './bindings';
 import './controllers';
 import { createConnection, Connection } from 'typeorm';
 import { TYPES } from './constants/types';
-import jwt from 'express-jwt';
 import { APP_SETTINGS } from './constants/appSettings';
 import cors from 'cors';
 import express from 'express';
 import log4js, { Logger } from 'log4js';
-
 
 
 const configServer = (app) => {
@@ -26,6 +24,8 @@ const configServer = (app) => {
 const configError = (app) => {
     app.use((err, req, res, next) => {
         console.error(err.stack);
+        const logger = container.get<Logger>(TYPES.Logger);
+        logger.error(err.stack)
         res.status(500).json(err).send();
     });
 }

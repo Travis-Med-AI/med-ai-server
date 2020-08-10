@@ -1,8 +1,5 @@
-import { ModelManifestItem } from "../interfaces/ModelManifestItem";
-import { StudyType } from "../enums/StudyType";
-import { Modality } from "../enums/Modality";
-import { ModelInputs } from "../enums/ModelInputs";
-import { ModelOutputs } from "../enums/ModelOutputs";
+import { ModelManifestItem } from "med-ai-common";
+import { StudyType, Modality, ModelInputs, ModelOutputs } from "med-ai-common";
 
 export const ModelManifest: ModelManifestItem[] = [
     {

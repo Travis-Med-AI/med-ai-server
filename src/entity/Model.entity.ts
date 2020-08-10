@@ -1,8 +1,5 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
-import { ModelOutputs } from "../enums/ModelOutputs";
-import { StudyType } from "../enums/StudyType";
-import { ModelInputs } from "../enums/ModelInputs";
-import { Modality } from "../enums/Modality";
+import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import { ModelOutputs, StudyType, ModelInputs, Modality } from "med-ai-common";
 
 @Entity()
 export class Model {

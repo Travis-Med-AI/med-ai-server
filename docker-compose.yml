@@ -16,8 +16,8 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ai-images:/tmp
+        
 volumes:
-
     ai-images:
         external:
             name: ai-images

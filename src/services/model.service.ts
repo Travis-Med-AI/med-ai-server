@@ -2,17 +2,16 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
 import { Model } from "../entity/Model.entity";
-import { ModelViewModel } from "../interfaces/ModelViewModel";
+import { ModelViewModel, Modality, ModelManifestItem, ClassifierViewModel } from "med-ai-common";
 import Docker from "dockerode";
 import { Classifier } from "../entity/Classifier.entity";
 import { JobService } from "./job.service";
-import { AiFactory } from "../factories/ai.factory";
 import * as _ from 'lodash';
-import { Modality } from "../enums/Modality";
-import { ModelManifestItem } from "../interfaces/ModelManifestItem";
 import { ModelManifest } from "../constants/model.manifest";
 import { exec } from 'child_process'
 import { createInterface } from 'readline';
+import { EvalFactory } from "../factories/eval.factory";
+import { ModelFactory } from "../factories/model.factory";
 
 @injectable()
 export class ModelService {
@@ -24,7 +23,8 @@ export class ModelService {
     constructor(
         @inject(TYPES.DatabaseService) private db: DatabaseService,
         @inject(TYPES.JobService) private jobService: JobService,
-        @inject(TYPES.AiFatory) private aiFactory: AiFactory
+        @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
+        @inject(TYPES.ModelFactory) private modelFactory: ModelFactory,
     ) {}
 
     async getModel(modelId: number): Promise<Model> {
@@ -33,11 +33,11 @@ export class ModelService {
 
     async registerModel(modelManifest: ModelManifestItem): Promise<ModelViewModel> {
         let savedModel = await this.saveModel(modelManifest);
-        return this.aiFactory.buildModelViewModel(savedModel);
+        return this.modelFactory.buildModelViewModel(savedModel);
     }
 
     async saveModel(modelManifest: ModelManifestItem): Promise<Model> {
-        let model = this.aiFactory.buildModel(modelManifest);
+        let model = this.modelFactory.buildModel(modelManifest);
 
         try {
             // pull image from dockerhub
@@ -48,6 +48,9 @@ export class ModelService {
                 } else {
                     console.log(stdout)
                     this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
+                    .then(out => {
+                        console.log('successfully saved model')
+                    })
                 }
 
             })
@@ -64,7 +67,7 @@ export class ModelService {
 
     async getModels(): Promise<ModelViewModel[]> {
         let models = await this.modelRepository.find();
-        return models.map(m => this.aiFactory.buildModelViewModel(m));
+        return models.map(m => this.modelFactory.buildModelViewModel(m));
     }
 
     async setClassifier(modelName:string, modality: Modality): Promise<ModelViewModel> {
@@ -77,16 +80,16 @@ export class ModelService {
         } 
 
         if(!classifier) {
-            let classifer = this.aiFactory.buildClassifier(model);
+            let classifer = this.modelFactory.buildClassifier(model);
             await this.classifierRepository.save(classifer);
         } else {
             await this.classifierRepository.update({ id: classifier.id }, { model })
         }
 
-        return this.aiFactory.buildModelViewModel(model);
+        return this.modelFactory.buildModelViewModel(model);
     }
     
-    async getClassifiers() {
+    async getClassifiers(): Promise<ClassifierViewModel[]> {
         let classifiers = await this.classifierRepository.find();
         return classifiers;
     }
@@ -109,6 +112,10 @@ export class ModelService {
 
     async retryModelDownload(image: string): Promise<ModelViewModel> {
         let manifest = _.find(ModelManifest, mi => mi.tag === image);
-        return this.registerModel(manifest)
+        let model = await this.modelRepository.findOne({image: manifest.tag});
+
+        await this.jobService.deleteEvalJobByModelId(model.id);
+        await this.modelRepository.delete({image: manifest.tag});
+        return this.registerModel(manifest);
     }
 }

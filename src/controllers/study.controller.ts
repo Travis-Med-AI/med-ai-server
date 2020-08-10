@@ -1,11 +1,11 @@
-import { controller, httpGet, httpPost } from "inversify-express-utils";
+import { controller, httpGet } from "inversify-express-utils";
 import { inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { CutsomRequest } from "../interfaces/Request";
 import * as _ from 'lodash';
 import { StudyService } from "../services/study.service";
-import { Study } from "../entity/Study.entity";
 import { Response } from "express";
+import { PagedResponse, StudyViewModel } from "med-ai-common";
 
 
 
@@ -14,7 +14,7 @@ export class StudyController {
     constructor(@inject(TYPES.StudyService) private studyService: StudyService) {}
 
     @httpGet('')
-    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<{studies: Study[], total: number}> {
+    public async getPatients(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyViewModel>> {
         return this.studyService.getStudies(req.query.page, req.query.pageSize, _.get(req.query, 'searchString', ''));
     }
 

@@ -1,10 +1,8 @@
 import { injectable } from 'inversify';
 import { User } from '../entity/User.entity';
-import { UserViewModel } from '../interfaces/UserViewModel';
+import { UserViewModel, ROLES, NewUserRequest } from 'med-ai-common';
 import { Role } from '../entity/Role.entity';
-import { ROLES } from '../enums/roles';
-import { userInfo } from 'os';
-import { NewUserRequest } from '../interfaces/NewUserRequest';
+
 
 @injectable()
 export class UserFactory {

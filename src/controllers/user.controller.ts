@@ -5,12 +5,11 @@ import { Response } from 'express';
 import { inject } from 'inversify';
 import { TYPES } from '../constants/types';
 import { UserService } from '../services/user.service';
-import { User } from '../entity/User.entity';
-import { UserViewModel } from '../interfaces/UserViewModel';
+import { UserViewModel, RoleViewModel } from 'med-ai-common';
 import { CutsomRequest } from '../interfaces/Request';
 import { Role } from '../entity/Role.entity';
-import { NewUserRequest } from '../interfaces/NewUserRequest';
-import { SignInRequest } from '../interfaces/SignInRequest';
+import { NewUserRequest } from 'med-ai-common';
+import { SignInRequest } from 'med-ai-common';
 
 @controller('/auth')
 // @controller('/auth', TYPES.AuthMiddleware)
@@ -33,7 +32,7 @@ export class UserController {
     }
 
     @httpPost('/role')
-    public async saveRole(req: CutsomRequest<Role>, res: Response): Promise<Role> {
+    public async saveRole(req: CutsomRequest<Role>, res: Response): Promise<RoleViewModel> {
         return this.userService.saveRole(req.body.name, req.body.description);
     }
 

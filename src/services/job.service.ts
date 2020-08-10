@@ -4,7 +4,10 @@ import { DatabaseService } from "./database.service";
 import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
 import { EvalJob } from "../entity/EvalJob.entity";
 import { Model } from "../entity/Model.entity";
-import { AiFactory } from "../factories/ai.factory";
+import { EvalJobViewModel } from "med-ai-common";
+import { UpdateResult, DeleteResult } from "typeorm";
+import { EvalFactory } from "../factories/eval.factory";
+import _ from 'lodash';
 
 
 @injectable()
@@ -14,32 +17,37 @@ export class JobService {
 
     constructor(
         @inject(TYPES.DatabaseService) private db: DatabaseService,
-        @inject(TYPES.AiFatory) private aiFactory: AiFactory
+        @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
     ) {}
 
-    async getEvalJobs(): Promise<EvalJob[]> {
+    async getEvalJobs(): Promise<EvalJobViewModel[]> {
         let evalJobs = await this.jobRepository.find({
             relations: ['model'],     
             order: {
                 id: "ASC",
         }});
 
-        return evalJobs
+        return _.map(evalJobs, job => this.evalFactory.buildEvalJobVM(job.id, job.model as Model, job.running))
     }
 
-    async killJob(jobId): Promise<EvalJob> {
+    async killJob(jobId): Promise<EvalJobViewModel> {
         let job = await this.jobRepository.findOneOrFail({id: jobId});
         job.running = false;
-        return await this.jobRepository.save(job);
+        job = await this.jobRepository.save(job);
+        return this.evalFactory.buildEvalJobVM(jobId, job.model as Model, false);
     }
 
     async startJob(jobId: number): Promise<{updated: number}> {
-        let jobDB = await this.jobRepository.update({id: jobId}, {running: true})
+        let jobDB: UpdateResult = await this.jobRepository.update({id: jobId}, {running: true})
         return { updated: jobDB.affected }
     }
 
     async saveEvalJob(model: Model): Promise<EvalJob> {
-        let evalJob = this.aiFactory.buildEvalJob(model, false)
+        let evalJob = this.evalFactory.buildEvalJob(model, false)
         return this.jobRepository.save(evalJob)
+    }
+
+    async deleteEvalJobByModelId(modelId: number): Promise<DeleteResult> {
+        return this.jobRepository.delete({model: modelId})
     }
 }

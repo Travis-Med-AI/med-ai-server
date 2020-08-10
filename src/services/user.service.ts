@@ -7,10 +7,9 @@ import { Repository, In } from "typeorm";
 import jwt from "jsonwebtoken";
 import { APP_SETTINGS } from "../constants/appSettings";
 import crypto from "crypto";
-import { UserViewModel } from "../interfaces/UserViewModel";
+import { UserViewModel, ROLES, NewUserRequest } from "med-ai-common";
 import { Role } from "../entity/Role.entity";
-import { ROLES } from "../enums/roles";
-import { NewUserRequest } from "../interfaces/NewUserRequest";
+
 
 @injectable()
 export class UserService {

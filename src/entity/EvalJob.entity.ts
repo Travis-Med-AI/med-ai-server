@@ -1,5 +1,4 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique, OneToOne} from "typeorm";
-import { EvalJobStatus } from "../enums/EvalJobStatus";
 import { Model } from "./Model.entity";
 
 @Entity()
@@ -10,7 +9,7 @@ export class EvalJob {
 
     @OneToOne(type => Model)
     @JoinColumn()
-    model: number | Model
+    model: Model | number
 
     @Column({default: 1})
     batchSize: number;

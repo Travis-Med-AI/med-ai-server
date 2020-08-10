@@ -1,8 +1,5 @@
-import { injectable, inject } from "inversify";
-import { Connection, createConnection, Repository } from "typeorm";
-import { TYPES } from "../constants/types";
+import { injectable } from "inversify";
 import { APP_SETTINGS } from "../constants/appSettings";
-import { AppSettings } from "../interfaces/AppSettings";
 
 
 @injectable()

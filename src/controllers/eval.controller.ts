@@ -3,8 +3,7 @@ import { inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { EvalService } from "../services/eval.service";
 import { CutsomRequest } from "../interfaces/Request";
-import { ModelViewModel } from "../interfaces/ModelViewModel";
-import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
+import { PagedResponse, StudyEvalVM } from "med-ai-common";
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import { Response } from "express";
@@ -15,12 +14,12 @@ export class EvalController {
     constructor(@inject(TYPES.EvalService) private evalService: EvalService) {}
 
     @httpGet('')
-    public async getStudyEval(req: CutsomRequest<ModelViewModel>, res: Response): Promise<{evals: StudyEvaluation[], total: number}> {
+    public async getStudyEval(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyEvalVM>> {
         return this.evalService.getEvals(+req.query.page, +req.query.pageSize,  _.get(req.query, 'searchString', ''));
     }
 
     @httpGet('/:modelId/:studyId') 
-    public async processDicom(req: CutsomRequest<any>, res: Response): Promise<any> {
+    public async processDicom(req: CutsomRequest<any>, res: Response): Promise<{ message: string }> {
         return this.evalService.processDicom(+req.params.modelId, +req.params.studyId);
     }
 
@@ -31,7 +30,7 @@ export class EvalController {
     }
 
     @httpDelete('/:id')
-    public async deleteEval(req: CutsomRequest<any>, res:Response) {
+    public async deleteEval(req: CutsomRequest<StudyEvalVM>, res:Response) {
         return this.evalService.deleteEval(+req.params.id)
     }
 

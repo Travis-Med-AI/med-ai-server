@@ -1,14 +1,13 @@
 import { injectable } from 'inversify';
-import { ModelViewModel } from '../interfaces/ModelViewModel';
+import { User } from '../entity/User.entity';
+import { UserViewModel, ROLES, NewUserRequest, ModelManifestItem, ModelViewModel } from 'med-ai-common';
+import { Role } from '../entity/Role.entity';
 import { Model } from '../entity/Model.entity';
-import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
-import { EvaluationStatus } from '../enums/EvaluationStatus';
-import { EvalJob } from '../entity/EvalJob.entity';
 import { Classifier } from '../entity/Classifier.entity';
-import { ModelManifestItem } from '../interfaces/ModelManifestItem';
+
 
 @injectable()
-export class AiFactory {
+export class ModelFactory {
 
     buildModel(modelVM: ModelManifestItem): Model {
         let { tag, input, output, inputType, displayName } = modelVM;
@@ -29,30 +28,15 @@ export class AiFactory {
         return {
             id: model.id,
             image: model.image,
+            displayName: model.displayName,
             input: model.input,
             output: model.output,
             hasImageOutput: model.hasImageOutput,
             inputType: model.inputType,
-            modality: model.modality
+            modality: model.modality,
+            pulled: model.pulled,
+            failed: model.failed
         }
-    }
-
-    buildStudyEval(modelId: number, studyId: number, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
-        let study = new StudyEvaluation();
-        study.model = modelId;
-        study.study = studyId;
-        if(modelOutput) study.modelOutput;
-        study.status = status;
-        
-        return study
-    }
-
-    buildEvalJob(model: Model, running: boolean): EvalJob {
-        let job = new EvalJob();
-        job.model = model;
-        job.running = running
-
-        return job;
     }
 
 
@@ -63,5 +47,4 @@ export class AiFactory {
 
         return classifer;
     }
-
 }
