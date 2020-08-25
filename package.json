@@ -14,6 +14,7 @@
   "dependencies": {
     "@log4js-node/logstashudp": "^1.2.1",
     "@types/axios": "^0.14.0",
+    "amqplib": "^0.6.0",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "celery-ts": "^1.1.0",
@@ -36,12 +37,14 @@
     "os-utils": "0.0.14",
     "pg": "^7.3.0",
     "reflect-metadata": "^0.1.10",
+    "socket.io": "^2.3.0",
     "systeminformation": "^4.26.10",
     "typeorm": "0.2.25",
     "typescript": "^3.6.4",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.5.13",
     "@types/bcrypt": "^3.0.0",
     "@types/dockerode": "^2.5.31",
     "@types/express": "^4.17.1",
@@ -50,6 +53,7 @@
     "@types/lodash": "^4.14.149",
     "@types/mongodb": "^3.3.11",
     "@types/node": "^8.0.29",
+    "@types/socket.io": "^2.1.11",
     "@types/unzipper": "^0.10.3",
     "bcrypt": "^4.0.1",
     "ts-node": "3.3.0",

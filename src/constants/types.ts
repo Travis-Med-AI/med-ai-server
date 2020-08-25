@@ -1,6 +1,8 @@
 export const TYPES = {
     DatabaseService: Symbol.for('DatabaseService'),
     DatabaseConnection: Symbol.for('DatabaseConnection'),
+
+    SocketClient: Symbol.for('SocketClient'),
     
     UserService: Symbol.for('UserService'),
     UserFactory: Symbol.for('UserFactory'),

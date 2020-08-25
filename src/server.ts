@@ -10,6 +10,9 @@ import { APP_SETTINGS } from './constants/appSettings';
 import cors from 'cors';
 import express from 'express';
 import log4js, { Logger } from 'log4js';
+import http from 'http';
+import socketIO, { Server, Socket } from 'socket.io';
+import ampq from 'amqplib/callback_api'
 
 
 const configServer = (app) => {
@@ -17,8 +20,8 @@ const configServer = (app) => {
         extended: true
     }));
     app.use(bodyParser.json());
-    app.use(cors())
-    app.use('/static', express.static('/tmp'))
+    app.use(cors());
+    app.use('/static', express.static('/tmp'));
 }
 
 const configError = (app) => {
@@ -50,6 +53,28 @@ const setUpLogging = () => {
     container.bind<Logger>(TYPES.Logger).toConstantValue(logger);
 }
 
+const setupRabbitMq = () => {
+  ampq.connect('amqp://rabbitmq', (err, connection) => {
+    if (err) throw err;
+
+    connection.createChannel((err, channel) => {
+      if (err) throw err;
+      let queue = 'notifications';
+
+      channel.assertQueue(queue, {
+        durable: false
+      });
+      channel.consume(queue, (msg) => {
+        let msgString = msg.content.toString()
+        const socket = container.get<Socket>(TYPES.SocketClient);
+        socket.emit('notification', msgString)
+        const logger = container.get<Logger>(TYPES.Logger);
+        logger.info(`Socketio emitted message: ${msgString}`)
+      })
+    })
+  })
+}
+
 createConnection().then(connection => {
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
 
@@ -61,6 +86,22 @@ createConnection().then(connection => {
     server.setErrorConfig(configError);
 
     let app = server.build();
-    app.listen(APP_SETTINGS.port);
-    console.log(`server listening on port ${APP_SETTINGS.port}`)
+    let serverInstance = app.listen(APP_SETTINGS.port);
+
+    let io = socketIO(serverInstance);
+
+    console.log(`server listening on port ${APP_SETTINGS.port}`);
+    io.on('connection', (client) => {
+      console.log('connected client')
+      client.emit('notification', 'Connected to server')
+      try{
+        const socket = container.get<Socket>(TYPES.SocketClient);
+        container.rebind<Socket>(TYPES.SocketClient).toConstantValue(client);
+        console.log('rebinding')
+      } catch {
+        container.bind<Socket>(TYPES.SocketClient).toConstantValue(client);
+      }
+      setupRabbitMq();
+    })
+
 })
