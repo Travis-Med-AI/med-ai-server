@@ -28,7 +28,7 @@
     "inversify-express-utils": "^6.3.2",
     "inversify-logger-middleware": "^3.1.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "log4js": "^6.3.0",
     "med-ai-common": "github:Travis-Med-AI/med-ai-common",
     "mongodb": "^3.3.2",
