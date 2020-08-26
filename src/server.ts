@@ -13,6 +13,7 @@ import log4js, { Logger } from 'log4js';
 import http from 'http';
 import socketIO, { Server, Socket } from 'socket.io';
 import ampq from 'amqplib/callback_api'
+import { AppSettingsService } from './services/appSettings.service';
 
 
 const configServer = (app) => {
@@ -54,7 +55,9 @@ const setUpLogging = () => {
 }
 
 const setupRabbitMq = () => {
-  ampq.connect('amqp://rabbitmq', (err, connection) => {
+  const appSettings = container.get<AppSettingsService>(TYPES.AppSettingsService);
+
+  ampq.connect(appSettings.getRabbitMqUrl(), (err, connection) => {
     if (err) throw err;
 
     connection.createChannel((err, channel) => {
@@ -77,6 +80,7 @@ const setupRabbitMq = () => {
 
 createConnection().then(connection => {
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
+    container.bind<Socket>(TYPES.SocketClient).toConstantValue({} as Socket);
 
     setUpLogging();
     
@@ -94,13 +98,7 @@ createConnection().then(connection => {
     io.on('connection', (client) => {
       console.log('connected client')
       client.emit('notification', 'Connected to server')
-      try{
-        const socket = container.get<Socket>(TYPES.SocketClient);
-        container.rebind<Socket>(TYPES.SocketClient).toConstantValue(client);
-        console.log('rebinding')
-      } catch {
-        container.bind<Socket>(TYPES.SocketClient).toConstantValue(client);
-      }
+      container.rebind<Socket>(TYPES.SocketClient).toConstantValue(client);
       setupRabbitMq();
     })
 

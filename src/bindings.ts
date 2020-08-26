@@ -10,6 +10,7 @@ import { EvalService } from "./services/eval.service";
 import { JobService } from "./services/job.service";
 import { ModelService } from "./services/model.service";
 import { StudyService } from "./services/study.service";
+import { RealtimeService } from "./services/realtime.service";
 import { MonitorSerivice } from "./services/monitor.service";
 import { EvalFactory } from "./factories/eval.factory";
 import { JobFactory } from "./factories/job.factory";
@@ -39,6 +40,8 @@ container.bind<ModelFactory>(TYPES.ModelFactory).to(ModelFactory);
 
 container.bind<StudyService>(TYPES.StudyService).to(StudyService);
 container.bind<StudyFactory>(TYPES.StudyFactory).to(StudyFactory);
+
+container.bind<RealtimeService>(TYPES.RealtimeService).to(RealtimeService);
 
 container.bind<MonitorSerivice>(TYPES.MonitorService).to(MonitorSerivice);
 container.bind<MonitorFactory>(TYPES.MonitorFactory).to(MonitorFactory);

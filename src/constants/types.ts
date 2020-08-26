@@ -25,6 +25,8 @@ export const TYPES = {
     StudyService: Symbol.for('StudyService'),
     StudyFactory: Symbol.for('StudyFactory'),
 
+    RealtimeService: Symbol.for('RealtimeService'),
+
     MonitorService: Symbol.for('MonitorService'),
     MonitorFactory: Symbol.for('MonitorFactory'),
     Logger: Symbol.for('Logger'),

@@ -12,6 +12,7 @@ import { exec } from 'child_process'
 import { createInterface } from 'readline';
 import { EvalFactory } from "../factories/eval.factory";
 import { ModelFactory } from "../factories/model.factory";
+import { RealtimeService } from "./realtime.service";
 
 @injectable()
 export class ModelService {
@@ -25,6 +26,7 @@ export class ModelService {
         @inject(TYPES.JobService) private jobService: JobService,
         @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
         @inject(TYPES.ModelFactory) private modelFactory: ModelFactory,
+        @inject(TYPES.RealtimeService) private realtimeService: RealtimeService,
     ) {}
 
     async getModel(modelId: number): Promise<Model> {
@@ -50,6 +52,7 @@ export class ModelService {
                     this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
                     .then(out => {
                         console.log('successfully saved model')
+                        this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`)
                     })
                 }
 
@@ -117,5 +120,9 @@ export class ModelService {
         await this.jobService.deleteEvalJobByModelId(model.id);
         await this.modelRepository.delete({image: manifest.tag});
         return this.registerModel(manifest);
+    }
+
+    async deleteModel(modelId: number): Promise<any> {
+        return await this.modelRepository.delete({id: modelId})
     }
 }

@@ -1,4 +1,4 @@
-import { controller, httpGet, httpPost } from "inversify-express-utils";
+import { controller, httpGet, httpPost, httpDelete } from "inversify-express-utils";
 import { inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { CutsomRequest } from "../interfaces/Request";
@@ -16,6 +16,11 @@ export class ModelController {
     @httpGet('')
     public async getModels(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel[]> {
         return this.modelService.getModels();
+    }
+
+    @httpDelete('/:id')
+    public async deleteModel(req: CutsomRequest<any>, res: Response): Promise<any> {
+        return this.modelService.deleteModel(+req.params.id);
     }
 
     @httpGet('/images')
@@ -47,5 +52,6 @@ export class ModelController {
     public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<ClassifierViewModel[]> {
         return this.modelService.getClassifiers();
     }
+
 
 }

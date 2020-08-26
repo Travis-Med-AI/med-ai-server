@@ -7,7 +7,7 @@ export class EvalJob {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToOne(type => Model)
+    @OneToOne(type => Model, { onDelete: 'CASCADE' })
     @JoinColumn()
     model: Model | number
 

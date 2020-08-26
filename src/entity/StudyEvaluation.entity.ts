@@ -18,7 +18,7 @@ export class StudyEvaluation {
     @Column({nullable: true, type: 'jsonb'})
     modelOutput: any;
 
-    @ManyToOne(type => Model)
+    @ManyToOne(type => Model, { onDelete: 'CASCADE' })
     @JoinColumn()
     model: number | Model
 
