@@ -55,4 +55,9 @@ export class StudyService {
     async getStudy(id: number): Promise<Study> {
         return this.studyRepository.findOne({id})
     }
+
+    async getPreview(orthancId: string): Promise<string>{
+        let study = await this.studyRepository.findOne({orthancStudyId:orthancId})
+        return `/tmp/${study.orthancStudyId}.png`
+    }
 }

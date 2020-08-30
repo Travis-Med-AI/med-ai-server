@@ -24,14 +24,16 @@ export class EvalFactory {
         return study
     }
 
-    buildStudyEvalViewModel(evaluation: StudyEvaluation): StudyEvalVM {
-        
+    buildStudyEvalViewModel(evaluation: StudyEvaluation, orthancId: string): StudyEvalVM {
         return {
             id: evaluation.id,
+            orthancId,
             modelOutput: evaluation.modelOutput,
             status: evaluation.status, 
             imgOutputPath: evaluation.imgOutputPath,
-            lastUpdate: evaluation.lastUpdate
+            lastUpdate: evaluation.lastUpdate,
+            logs: evaluation.stdout,
+            study: this.studyFactory.buildStudyViewModel(evaluation.study as Study)
         }
     }
 

@@ -18,6 +18,7 @@ import { ModelFactory } from "./factories/model.factory";
 import { StudyFactory } from "./factories/study.factory";
 import { MonitorFactory } from "./factories/monitor.factory";
 import { ResponseFactory } from "./factories/response.factory";
+import { RealtimeFactory } from "./factories/realtime.factory";
 
 export let container = new Container();
 
@@ -41,7 +42,8 @@ container.bind<ModelFactory>(TYPES.ModelFactory).to(ModelFactory);
 container.bind<StudyService>(TYPES.StudyService).to(StudyService);
 container.bind<StudyFactory>(TYPES.StudyFactory).to(StudyFactory);
 
-container.bind<RealtimeService>(TYPES.RealtimeService).to(RealtimeService);
+container.bind<RealtimeService>(TYPES.RealtimeService).to(RealtimeService).inRequestScope();
+container.bind<RealtimeFactory>(TYPES.RealtimeFactory).to(RealtimeFactory);
 
 container.bind<MonitorSerivice>(TYPES.MonitorService).to(MonitorSerivice);
 container.bind<MonitorFactory>(TYPES.MonitorFactory).to(MonitorFactory);

@@ -15,5 +15,9 @@ export const APP_SETTINGS: AppSettings = {
         host: 'localhost',
         port: 8042
     },
+    logstash: {
+        host: 'localhost',
+        port: 5000
+    },
     imageSaveLocation: '/tmp/'
 }

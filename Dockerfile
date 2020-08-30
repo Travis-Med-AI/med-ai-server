@@ -12,9 +12,10 @@ RUN apt-get update -qq && apt-get install -qqy \
 # Install Docker from Docker Inc. repositories.
 RUN curl -sSL https://get.docker.com/ | sh
 WORKDIR /opt
-
-ADD . /opt/
+ADD package.json /opt/
 RUN npm install
+ADD . /opt/
+
 RUN npm run build
 
 

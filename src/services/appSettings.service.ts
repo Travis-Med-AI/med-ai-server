@@ -14,6 +14,7 @@ export class AppSettingsService {
         this.appSettings.orthanc.host = process.env.ORTHANC_HOST || this.appSettings.orthanc.host;
         this.appSettings.redis.host = process.env.REDIS_HOST || this.appSettings.orthanc.host;
         this.appSettings.rabbitMq.host = process.env.RABBITMQ_HOST || this.appSettings.orthanc.host;
+        this.appSettings.logstash.host = process.env.LOGSTASH_HOST || this.appSettings.logstash.host;
     }
 
     getRedisUrl() {
@@ -26,6 +27,10 @@ export class AppSettingsService {
 
     getOrthancUrl() {
         return `http://${this.appSettings.orthanc.host}:${this.appSettings.orthanc.port}`
+    }
+
+    getLogstashUrl() {
+        return `http://${this.appSettings.logstash.host}:${this.appSettings.logstash.port}`
     }
 
 }

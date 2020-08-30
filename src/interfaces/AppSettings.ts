@@ -9,5 +9,6 @@ export interface AppSettings {
     rabbitMq: ExternalService,
     redis: ExternalService,
     orthanc: ExternalService,
+    logstash: ExternalService,
     imageSaveLocation: string
 }

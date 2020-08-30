@@ -2,7 +2,7 @@ import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
 import { Model } from "../entity/Model.entity";
-import { ModelViewModel, Modality, ModelManifestItem, ClassifierViewModel } from "med-ai-common";
+import { ModelViewModel, Modality, ModelManifestItem, ClassifierViewModel, Notifications } from "med-ai-common";
 import Docker from "dockerode";
 import { Classifier } from "../entity/Classifier.entity";
 import { JobService } from "./job.service";
@@ -13,6 +13,7 @@ import { createInterface } from 'readline';
 import { EvalFactory } from "../factories/eval.factory";
 import { ModelFactory } from "../factories/model.factory";
 import { RealtimeService } from "./realtime.service";
+import { RealtimeFactory } from "../factories/realtime.factory";
 
 @injectable()
 export class ModelService {
@@ -27,6 +28,7 @@ export class ModelService {
         @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
         @inject(TYPES.ModelFactory) private modelFactory: ModelFactory,
         @inject(TYPES.RealtimeService) private realtimeService: RealtimeService,
+        @inject(TYPES.RealtimeFactory) private realtimeFactory: RealtimeFactory,
     ) {}
 
     async getModel(modelId: number): Promise<Model> {
@@ -51,8 +53,7 @@ export class ModelService {
                     console.log(stdout)
                     this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
                     .then(out => {
-                        console.log('successfully saved model')
-                        this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`)
+                        this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, Notifications.modelReady)
                     })
                 }
 

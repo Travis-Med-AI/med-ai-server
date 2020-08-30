@@ -12,6 +12,7 @@ services:
             - ORTHANC_HOST=orthanc
             - REDIS_HOST=redis
             - RABBITMQ_HOST=rabbitmq
+            - LOGSTASH_HOST=logstash
             - NVIDIA_VISIBLE_DEVICES=all
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock

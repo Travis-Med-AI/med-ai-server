@@ -15,12 +15,17 @@ export class EvalController {
 
     @httpGet('')
     public async getStudyEval(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyEvalVM>> {
-        return this.evalService.getEvals(+req.query.page, +req.query.pageSize,  _.get(req.query, 'searchString', ''));
+        return this.evalService.getEvals(+req.query.page, +req.query.pageSize,  _.get(req.query as _.Dictionary<string>, 'searchString', ''));
     }
 
     @httpGet('/:modelId/:studyId') 
     public async processDicom(req: CutsomRequest<any>, res: Response): Promise<{ message: string }> {
         return this.evalService.processDicom(+req.params.modelId, +req.params.studyId);
+    }
+
+    @httpGet('/logs')
+    public async  getEvalLog(req: CutsomRequest<any>, res: Response) {
+        return this.evalService.getEvalLog(+req.query.evalId)
     }
 
     @httpGet('/output-image')

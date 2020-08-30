@@ -13,10 +13,13 @@ export class StudyEvaluation {
 
     @ManyToOne(type => Study, study => study.patientId, {eager: true})
     @JoinColumn()
-    study: number;
+    study: number | Study;
 
     @Column({nullable: true, type: 'jsonb'})
     modelOutput: any;
+
+    @Column({nullable: true, type: 'jsonb'})
+    stdout: any;
 
     @ManyToOne(type => Model, { onDelete: 'CASCADE' })
     @JoinColumn()

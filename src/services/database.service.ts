@@ -7,10 +7,7 @@ import { AppSettingsService } from "./appSettings.service";
 
 @injectable()
 export class DatabaseService {
-    celeryClient = Celery.createClient({
-        brokerUrl: this.settingsService.getRabbitMqUrl(),
-        resultBackend: this.settingsService.getRedisUrl()
-    });
+
 
 
     constructor(
@@ -24,7 +21,11 @@ export class DatabaseService {
     }
 
     startCeleryTask(taskName: string, args: any[]) {
-        const task: Celery.Task<string> = this.celeryClient.createTask<string>(taskName);
+        let celeryClient = Celery.createClient({
+            brokerUrl: this.settingsService.getRabbitMqUrl(),
+            resultBackend: this.settingsService.getRedisUrl()
+        });
+        const task: Celery.Task<string> = celeryClient.createTask<string>(taskName);
 
         task.applyAsync({
             args: args,

@@ -12,8 +12,10 @@ import express from 'express';
 import log4js, { Logger } from 'log4js';
 import http from 'http';
 import socketIO, { Server, Socket } from 'socket.io';
-import ampq from 'amqplib/callback_api'
 import { AppSettingsService } from './services/appSettings.service';
+import { RealtimeService } from './services/realtime.service';
+import { Notifications } from 'med-ai-common';
+import path from 'path';
 
 
 const configServer = (app) => {
@@ -35,12 +37,13 @@ const configError = (app) => {
 }
 
 const setUpLogging = () => {
+    let appSettingsService = container.get<AppSettingsService>(TYPES.AppSettingsService)
     log4js.configure({
         appenders: {
           logstash: {
             type: '@log4js-node/logstashudp',
-            host: 'localhost',
-            port: 5000
+            host: appSettingsService.appSettings.logstash.host,
+            port: appSettingsService.appSettings.logstash.port
           }
         },
         categories: {
@@ -54,52 +57,33 @@ const setUpLogging = () => {
     container.bind<Logger>(TYPES.Logger).toConstantValue(logger);
 }
 
-const setupRabbitMq = () => {
-  const appSettings = container.get<AppSettingsService>(TYPES.AppSettingsService);
-
-  ampq.connect(appSettings.getRabbitMqUrl(), (err, connection) => {
-    if (err) throw err;
-
-    connection.createChannel((err, channel) => {
-      if (err) throw err;
-      let queue = 'notifications';
-
-      channel.assertQueue(queue, {
-        durable: false
-      });
-      channel.consume(queue, (msg) => {
-        let msgString = msg.content.toString()
-        const socket = container.get<Socket>(TYPES.SocketClient);
-        socket.emit('notification', msgString)
-        const logger = container.get<Logger>(TYPES.Logger);
-        logger.info(`Socketio emitted message: ${msgString}`)
-      })
-    })
-  })
-}
-
 createConnection().then(connection => {
+
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
     container.bind<Socket>(TYPES.SocketClient).toConstantValue({} as Socket);
-
     setUpLogging();
-    
+
+    const notifcationService = container.get<RealtimeService>(TYPES.RealtimeService);
+
     let server = new InversifyExpressServer(container);
 
     server.setConfig(configServer)
     server.setErrorConfig(configError);
 
     let app = server.build();
+    app.use('/images', express.static(path.resolve('/tmp')));
     let serverInstance = app.listen(APP_SETTINGS.port);
 
     let io = socketIO(serverInstance);
 
+
     console.log(`server listening on port ${APP_SETTINGS.port}`);
     io.on('connection', (client) => {
-      console.log('connected client')
-      client.emit('notification', 'Connected to server')
+      console.log('connected client', client.id)
       container.rebind<Socket>(TYPES.SocketClient).toConstantValue(client);
-      setupRabbitMq();
+      notifcationService.socket = client;
+      notifcationService.sendNotification('connected to server', Notifications.connected)
+      notifcationService.setupRabbitMq()
     })
 
 })

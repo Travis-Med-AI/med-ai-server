@@ -9,6 +9,7 @@ import { PagedResponse } from 'med-ai-common';
 import { EvalFactory } from "../factories/eval.factory";
 import { ResponseFactory } from "../factories/response.factory";
 import _ from 'lodash';
+import { Study } from "../entity/Study.entity";
 
 
 @injectable()
@@ -36,15 +37,19 @@ export class EvalService {
         .where('study.patientId like :patientId', {patientId: `%${searchString}%`})
         .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
         .orWhere('eval."modelOutput"::TEXT like :output', {output: `%${searchString}%`})
-        .orderBy('study.patientId', 'ASC')
+        .orderBy('eval.status', 'DESC')
+        .addOrderBy('eval.id', 'DESC')
         .skip(page)
         .take(pageSize)
 
         let evals = await query.getManyAndCount()
 
-        let studyEvalVMs = _.map(evals[0], e => this.evalFactory.buildStudyEvalViewModel(e))
+        let studyEvalVMs = _.map(evals[0], e => {
+            let study = e.study as Study
+            return this.evalFactory.buildStudyEvalViewModel(e, study.orthancStudyId)
+        })
 
-        return this.responseFactory.buildPagedResponse<StudyEvalVM>(evals[0], evals[1])
+        return this.responseFactory.buildPagedResponse<StudyEvalVM>(studyEvalVMs, evals[1])
     }
 
     async getOutputImage(evalId: number) {
@@ -62,12 +67,15 @@ export class EvalService {
         let study = await this.studyService.getStudy(studyId);
         let model = await this.modelService.getModel(modelId);
 
-        let evaluation = await this.evaluateStudy(model.id, studyId)
+        this.db.startCeleryTask('runner.evaluate_dicom', [model.id, study.orthancStudyId])
 
-        this.db.startCeleryTask('runner.evaluate_dicom', [model.id, study.orthancStudyId, evaluation.id])
-
-        
         return {message: 'started task'}
+    }
+
+    async getEvalLog(evalId:number): Promise<string[]> {
+        let evalulation = await this.evalRepository.findOne({id: evalId});
+
+        return evalulation.stdout;
     }
 
 }
