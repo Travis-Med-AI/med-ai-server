@@ -11,7 +11,10 @@ export class Study {
     orthancStudyId: string;
 
     @Column({nullable: true})
-    patientId: string;
+    patientId: string;    
+    
+    @Column({nullable: true})
+    studyUid: string;
 
     @Column('text', {nullable: true})
     type: StudyType;    
