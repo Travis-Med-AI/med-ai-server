@@ -14,14 +14,14 @@ export class EvalFactory {
     constructor(@inject(TYPES.StudyFactory) private studyFactory: StudyFactory,
                 @inject(TYPES.ModelFactory) private modelFactory: ModelFactory) {}
 
-    buildStudyEval(modelId: number, studyId: number, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
-        let study = new StudyEvaluation();
-        study.model = modelId;
-        study.study = studyId;
-        if(modelOutput) study.modelOutput;
-        study.status = status;
+    buildStudyEval(modelId: number, study: Study, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
+        let studyEval = new StudyEvaluation();
+        studyEval.model = modelId;
+        studyEval.study = study;
+        if(modelOutput) studyEval.modelOutput;
+        studyEval.status = status;
         
-        return study
+        return studyEval
     }
 
     buildStudyEvalViewModel(evaluation: StudyEvaluation, orthancId: string): StudyEvalVM {

@@ -13,7 +13,7 @@ export class StudyEvaluation {
 
     @ManyToOne(type => Study, study => study.patientId, {eager: true})
     @JoinColumn()
-    study: number | Study;
+    study: Study;
 
     @Column({nullable: true, type: 'jsonb'})
     modelOutput: any;

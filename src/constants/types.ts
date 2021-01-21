@@ -16,6 +16,9 @@ export const TYPES = {
     EvalService: Symbol.for('EvalService'),
     EvalFactory: Symbol.for('EvalFactory'),
 
+    ExperimentService: Symbol.for('ExperimentService'),
+    ExperimentFactory: Symbol.for('ExperimentFactory'),
+
     JobService: Symbol.for('JobService'),
     JobFactory: Symbol.for('JobFactory'),
 

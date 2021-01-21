@@ -5,7 +5,7 @@ import { Study } from "../entity/Study.entity";
 import axios from 'axios';
 import { AppSettingsService } from "./appSettings.service";
 import { Logger } from "log4js";
-import { PagedResponse, StudyViewModel } from "med-ai-common";
+import { PagedResponse, StudyType, StudyViewModel } from "med-ai-common";
 import { StudyFactory } from "../factories/study.factory";
 import _ from 'lodash';
 import { ResponseFactory } from "../factories/response.factory";
@@ -28,17 +28,25 @@ export class StudyService {
         return `started task for model ${modelId}`
     }
 
-    async getStudies(page: string, pageSize: string, searchString: string): Promise<PagedResponse<StudyViewModel>> {
-        let studies = await this.studyRepository.findAndCount({
-            skip: +page,
-            take: +pageSize,
-            where: `"patientId" ILIKE '%${searchString}%'
-                OR "orthancStudyId" ILIKE '%${searchString}%'
-                OR "type" ILIKE '%${searchString}%'
-                OR "modality" ILIKE '%${searchString}%'
-            ` 
-        }, );
+    async getStudies(page: string, pageSize: string, searchString: string, studyType: StudyType): Promise<PagedResponse<StudyViewModel>> {
+        let query = this.studyRepository.createQueryBuilder('study')
 
+        if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
+        if (searchString) {
+            query = query
+            .orWhere('study.patientId like :patientId', {patientId: `%${searchString}%`})
+            .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
+            .orWhere('study."modality"::TEXT like :modality', {modality: `%${searchString}%`})
+            .orWhere('study."type"::TEXT like :type', {type: `%${searchString}%`})
+        }
+
+
+        query = query
+        .skip(+page)
+        .take(+pageSize)
+
+        let studies = await query.getManyAndCount()
+        
         this.logger.info('getting studies');
 
         let studyViewModels = _.map(studies[0], study => this.studyFactory.buildStudyViewModel(study))
@@ -59,5 +67,9 @@ export class StudyService {
     async getPreview(orthancId: string): Promise<string>{
         let study = await this.studyRepository.findOne({orthancStudyId:orthancId})
         return `/tmp/${study.orthancStudyId}.png`
+    }
+
+    async getStudiesByIds(studIds: number[]): Promise<Study[]> {
+        return await this.studyRepository.findByIds(studIds)
     }
 }
