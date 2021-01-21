@@ -19,6 +19,8 @@ import { StudyFactory } from "./factories/study.factory";
 import { MonitorFactory } from "./factories/monitor.factory";
 import { ResponseFactory } from "./factories/response.factory";
 import { RealtimeFactory } from "./factories/realtime.factory";
+import { ExperimentService } from './services/experiment.service'
+import { ExperimentFactory } from "./factories/experiment.factory";
 
 export let container = new Container();
 
@@ -32,6 +34,9 @@ container.bind<AdminMiddleware>(TYPES.AdminMiddleware).to(AdminMiddleware);
 
 container.bind<EvalService>(TYPES.EvalService).to(EvalService);
 container.bind<EvalFactory>(TYPES.EvalFactory).to(EvalFactory);
+
+container.bind<ExperimentService>(TYPES.ExperimentService).to(ExperimentService);
+container.bind<ExperimentFactory>(TYPES.ExperimentFactory).to(ExperimentFactory);
 
 container.bind<JobService>(TYPES.JobService).to(JobService);
 container.bind<JobFactory>(TYPES.JobFactory).to(JobFactory);

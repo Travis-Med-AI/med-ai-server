@@ -32,7 +32,7 @@ export class ModelService {
     ) {}
 
     async getModel(modelId: number): Promise<Model> {
-        return this.modelRepository.findOne({id: modelId});
+        return this.modelRepository.findOneOrFail({id: modelId});
     }
 
     async registerModel(modelManifest: ModelManifestItem): Promise<ModelViewModel> {

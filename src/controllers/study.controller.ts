@@ -5,7 +5,7 @@ import { CutsomRequest } from "../interfaces/Request";
 import * as _ from 'lodash';
 import { StudyService } from "../services/study.service";
 import { Response } from "express";
-import { PagedResponse, StudyViewModel } from "med-ai-common";
+import { PagedResponse, StudyType, StudyViewModel } from "med-ai-common";
 import fs from 'fs';
 
 
@@ -18,7 +18,8 @@ export class StudyController {
     public async getPatients(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyViewModel>> {
         return this.studyService.getStudies(_.get(req.query as _.Dictionary<string>, 'page'), 
                                             _.get(req.query as _.Dictionary<string>, 'pageSize'), 
-                                            _.get(req.query as _.Dictionary<string>, 'searchString', '')); 
+                                            _.get(req.query as _.Dictionary<string>, 'searchString', ''),
+                                            _.get(req.query as _.Dictionary<StudyType>, 'studyType')); 
     }
 
     @httpGet('/orthanc-count')

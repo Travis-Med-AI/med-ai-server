@@ -5,3 +5,4 @@ export * from './model.controller';
 export * from './study.controller';
 export * from './monitor.controller';
 export * from './realtime.controller';
+export * from './experiment.controller';

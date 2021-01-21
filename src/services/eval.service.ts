@@ -25,9 +25,10 @@ export class EvalService {
     ) {}
 
     async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
-        let study = this.evalFactory.buildStudyEval(modelId, studyId, EvaluationStatus.running);
+        let study = await this.studyService.getStudy(studyId)
+        let studyEval = this.evalFactory.buildStudyEval(modelId, study, EvaluationStatus.running);
         
-        return this.evalRepository.save(study)
+        return this.evalRepository.save(studyEval)
     }
 
     async getEvals(page: number, pageSize: number, searchString: string): Promise<PagedResponse<StudyEvalVM>> {
