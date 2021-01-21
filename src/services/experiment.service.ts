@@ -12,7 +12,7 @@ import { ModelService } from "./model.service";
 import { ExperimentFactory } from "../factories/experiment.factory";
 import { EvalService } from "./eval.service";
 import { In } from "typeorm";
-import { Parser } from 'json2csv'
+import { Parser } from 'json2csv';
 
 
 @injectable()
@@ -157,7 +157,7 @@ export class ExperimentService {
                 studyUid: _.get(e, 'study.studyUid'),
                 patientId: _.get(e, 'study.patientId'),
                 orthancId: _.get(e, 'study.orthancStudyId'),
-                diagnosis: _.get(e, 'modelOutput.display', ''),
+                diagnosis: _.get(e, 'modelOutput.display', '').replace(/,/g, '\,'),
                 ...e.modelOutput.class_probabilities
             }))
         )
