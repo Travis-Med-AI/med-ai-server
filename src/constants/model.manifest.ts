@@ -38,4 +38,13 @@ export const ModelManifest: ModelManifestItem[] = [
         output: ModelOutputs.classProbabilities,
         hasImageOutput: true
     },
+    {
+        tag: 'tclarke104/pe-model:0.1',
+        displayName: 'PE Detection',
+        input: StudyType.CT,
+        modality: Modality.CT,
+        inputType: ModelInputs.DICOM,
+        output: ModelOutputs.classProbabilities,
+        hasImageOutput: false
+    },
 ]
