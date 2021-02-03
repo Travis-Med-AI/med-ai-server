@@ -137,10 +137,16 @@ export class ExperimentService {
 
         let probs = _.get(evals[0], 'modelOutput.class_probabilities')
 
-        let extraFields = Object.keys(probs || {}).map(k => ({
-            value: k,
-            label: k
-        }))
+
+        let extraFields = []
+
+        evals.forEach(e => {
+            let prob = _.get(e, 'modelOutput.class_probabilities', {})
+            let kvArray = Object.keys(prob).map(k => ({value: k, label: k}))
+            extraFields = _.concat(probs, kvArray)
+        });
+
+        extraFields = _.uniqBy(evals, 'value')
 
         let fields = [
             {value:'studyUid', label: 'Study UID'},
@@ -161,6 +167,30 @@ export class ExperimentService {
                 ...e.modelOutput.class_probabilities
             }))
         )
+    }
+
+    async downloadKaggleCSV(experimentId: number) {
+        let experiment = await this.experimentRepository.findOne({id: experimentId})
+
+        let evals = await this.evalService.evalRepository.find({ 
+            study: In(experiment.studies.map(s => s.id))
+        })
+
+        let probs = []
+
+        evals.forEach(e => {
+            let prob = _.get(e, 'modelOutput.class_probabilities', {})
+            let kvArray = Object.keys(prob).map(k => ({id: k, label: prob[k]}))
+            probs = _.concat(probs, kvArray)
+        });
+
+        let fields = [
+            {value:'id', label: 'id'},
+            {value:'label', label: 'label'},
+        ]
+
+        const json2csv = new Parser({fields})
+        return json2csv.parse(probs)
     }
 
     async addAllToExperiment(experimentId: number, searchString: string='', studyType: StudyType) {

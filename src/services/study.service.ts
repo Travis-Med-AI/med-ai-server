@@ -29,7 +29,7 @@ export class StudyService {
     }
 
     async getStudies(page: string, pageSize: string, searchString: string, studyType: StudyType): Promise<PagedResponse<StudyViewModel>> {
-        let query = this.studyRepository.createQueryBuilder('study')
+        let query = this.studyRepository.createQueryBuilder('study').where('study.type is not null')
 
         if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
         if (searchString) {
