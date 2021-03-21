@@ -36,7 +36,6 @@ export class RealtimeService {
         let id = _.get(notificationDb, 'id', -1)
 
         let notification = this.realtimeFactory.buildNotification(message, type, id)
-        console.log('sedning notifiaction with socket', this.socket.id)
 
         this.socket.emit(Sockets.notifications, notification);
         
@@ -53,7 +52,6 @@ export class RealtimeService {
         // connect to rabbitmq
         ampq.connect(this.appSettings.getRabbitMqUrl(), (err, connection) => {
           if (err) throw err;
-          console.log('connected to rabbitmq')
           connection.createChannel((err, channel) => {
             if (err) throw err;
             this.channel = channel;
