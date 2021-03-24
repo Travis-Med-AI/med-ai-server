@@ -16,6 +16,9 @@ export class Study {
     @Column({nullable: true})
     studyUid: string;
 
+    @Column({nullable: true})
+    seriesUid: string;
+
     @Column('text', {nullable: true})
     type: StudyType;    
     

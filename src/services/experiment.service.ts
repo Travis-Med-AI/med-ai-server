@@ -150,6 +150,7 @@ export class ExperimentService {
 
         let fields = [
             {value:'studyUid', label: 'Study UID'},
+            {value:'seriesUid', label: 'Series UID'},
             {value:'patientId', label: 'Patient Id'},
             {value:'orthancId', label: 'Orthanc Study Id'},
             {value:'diagnosis', label: 'Diagnosis'},
@@ -161,6 +162,7 @@ export class ExperimentService {
         return json2csv.parse(
             evals.map(e => ({
                 studyUid: _.get(e, 'study.studyUid'),
+                seriesUid: _.get(e, 'study.seriesUid'),
                 patientId: _.get(e, 'study.patientId'),
                 orthancId: _.get(e, 'study.orthancStudyId'),
                 diagnosis: _.get(e, 'modelOutput.display', '').replace(/,/g, '\,'),

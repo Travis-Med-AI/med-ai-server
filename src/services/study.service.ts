@@ -55,7 +55,7 @@ export class StudyService {
     }
 
     async getOrthancStudyCount() {
-        let studies = await axios.get(`${this.settingsService.getOrthancUrl()}/studies`)
+        let studies = await axios.get(`${this.settingsService.getOrthancUrl()}/series`)
 
         return {count: studies.data.length}
     }
