@@ -12,6 +12,15 @@ export const ModelManifest: ModelManifestItem[] = [
         hasImageOutput: false
     },
     {
+        tag: 'tclarke104/ich-model-single:0.1',
+        displayName: 'Intracranial Hemorrhage Detection Single Slice detection',
+        input: StudyType.CT,
+        modality: Modality.CT,
+        inputType: ModelInputs.DICOM,
+        output: ModelOutputs.classProbabilities,
+        hasImageOutput: false
+    },
+    {
         tag: 'tclarke104/cxr-classifier:0.1',
         displayName: 'Chest X-Ray Classifier',
         input: StudyType.dicom,
