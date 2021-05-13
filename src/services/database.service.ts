@@ -23,7 +23,7 @@ export class DatabaseService {
     startCeleryTask(taskName: string, args: any[]) {
         let celeryClient = Celery.createClient({
             brokerUrl: this.settingsService.getRabbitMqUrl(),
-            resultBackend: this.settingsService.getRedisUrl()
+            resultBackend: this.settingsService.getRedisUrl(),
         });
         const task: Celery.Task<string> = celeryClient.createTask<string>(taskName);
 

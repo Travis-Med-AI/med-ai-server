@@ -35,7 +35,9 @@ export class ModelFactory {
             inputType: model.inputType,
             modality: model.modality,
             pulled: model.pulled,
-            failed: model.failed
+            failed: model.failed,
+            quickstart: model.quickStart,
+            running: model.running
         }
     }
 

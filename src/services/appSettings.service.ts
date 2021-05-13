@@ -22,7 +22,7 @@ export class AppSettingsService {
     }
 
     getRabbitMqUrl() {
-        return `amqp://${this.appSettings.rabbitMq.host}:${this.appSettings.rabbitMq.port}`
+        return `amqp://${this.appSettings.rabbitMq.host}:${this.appSettings.rabbitMq.port}/`
     }
 
     getOrthancUrl() {

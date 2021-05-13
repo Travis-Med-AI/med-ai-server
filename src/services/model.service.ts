@@ -93,7 +93,7 @@ export class ModelService {
         return this.modelFactory.buildModelViewModel(model);
     }
     
-    async getClassifiers(): Promise<ClassifierViewModel[]> {
+    async getClassifiers(): Promise<any[]> {
         let classifiers = await this.classifierRepository.find();
         return classifiers;
     }
@@ -125,5 +125,13 @@ export class ModelService {
 
     async deleteModel(modelId: number): Promise<any> {
         return await this.modelRepository.delete({id: modelId})
+    }
+
+
+    async toggleQuickstart(modelId: number): Promise<ModelViewModel> {
+        let model = await this.modelRepository.findOne({id: modelId});
+        model.quickStart = !model.quickStart
+        model = await this.modelRepository.save(model)
+        return this.modelFactory.buildModelViewModel(model)
     }
 }

@@ -1,4 +1,4 @@
-import { controller, httpGet } from "inversify-express-utils";
+import { controller, httpGet, httpDelete } from "inversify-express-utils";
 import { inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { CutsomRequest } from "../interfaces/Request";
@@ -25,5 +25,10 @@ export class StudyController {
     @httpGet('/orthanc-count')
     public async getOrhtancStudyCount(req: CutsomRequest<any>, res: Response): Promise<{count: number}> {
         return this.studyService.getOrthancStudyCount();
+    }
+
+    @httpDelete('/:id')
+    public async deleteModel(req: CutsomRequest<any>, res: Response): Promise<any> {
+        return this.studyService.deleteStudy(+req.params.id);
     }
 }

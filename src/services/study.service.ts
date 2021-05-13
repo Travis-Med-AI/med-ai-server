@@ -54,6 +54,10 @@ export class StudyService {
         return this.responseFactory.buildPagedResponse(studyViewModels, studies[1])
     }
 
+    async deleteStudy(studyId:number): Promise<any> {
+        return await this.studyRepository.delete({id: studyId})
+    }
+
     async getOrthancStudyCount() {
         let studies = await axios.get(`${this.settingsService.getOrthancUrl()}/series`)
 

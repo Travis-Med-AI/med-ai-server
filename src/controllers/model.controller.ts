@@ -53,5 +53,9 @@ export class ModelController {
         return this.modelService.getClassifiers();
     }
 
+    @httpPost('/toggle-quickstart')
+    public async toggleQuickstart(req: CutsomRequest<{id:number}>, res: Response): Promise<ModelViewModel> {
+        return this.modelService.toggleQuickstart(req.body.id);
+    }
 
 }
