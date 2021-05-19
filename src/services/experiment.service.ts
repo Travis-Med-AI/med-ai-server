@@ -131,9 +131,8 @@ export class ExperimentService {
     async downloadResults(experimentId: number): Promise<any> {
         let experiment = await this.experimentRepository.findOne({id: experimentId})
 
-        let evals = await this.evalService.evalRepository.find({ 
-            study: In(experiment.studies.map(s => s.id))
-        })
+        // TODO: FIX THIS!!!
+        let evals = await this.evalService.evalRepository.find()
 
         let probs = _.get(evals[0], 'modelOutput.class_probabilities')
 
@@ -174,9 +173,7 @@ export class ExperimentService {
     async downloadKaggleCSV(experimentId: number) {
         let experiment = await this.experimentRepository.findOne({id: experimentId})
 
-        let evals = await this.evalService.evalRepository.find({ 
-            study: In(experiment.studies.map(s => s.id))
-        })
+        let evals = await this.evalService.evalRepository.find()
 
         let probs = []
 

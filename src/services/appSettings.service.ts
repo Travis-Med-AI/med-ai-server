@@ -1,36 +1,60 @@
-import { injectable } from "inversify";
+import { AppSettings } from "../entity/AppSettings.entity";
+import { inject, injectable } from "inversify";
 import { APP_SETTINGS } from "../constants/appSettings";
-
+import { TYPES } from "../constants/types";
+import { DatabaseService } from "./database.service";
+import * as Celery from 'celery-ts';
+import * as _ from 'lodash';
 
 @injectable()
 export class AppSettingsService {
-    appSettings = APP_SETTINGS
+    settingsRepository = this.db.getRepository<AppSettings>(AppSettings);
+
     constructor(
+        @inject(TYPES.DatabaseService) private db: DatabaseService,
+
     ) {
         this.getSettings()
     }
 
-    getSettings() {
-        this.appSettings.orthanc.host = process.env.ORTHANC_HOST || this.appSettings.orthanc.host;
-        this.appSettings.redis.host = process.env.REDIS_HOST || this.appSettings.orthanc.host;
-        this.appSettings.rabbitMq.host = process.env.RABBITMQ_HOST || this.appSettings.orthanc.host;
-        this.appSettings.logstash.host = process.env.LOGSTASH_HOST || this.appSettings.logstash.host;
+    async getSettings() {
+        let settings = await this.settingsRepository.findOne() || {} as any;
+        settings.redisUrl = process.env.REDIS_URL as string || _.get(settings, 'redisUrl', 'redis://redis:6379')
+        settings.rabbitmqUrl = process.env.RABBITMQ_URL as string || _.get(settings, 'rabbitmqUrl', 'amqp://guest:guest@rabbitmq:5672')
+        settings.orthancUrl = process.env.ORTHANC_URL as string || _.get(settings, 'orthancUrl', 'http://orthanc:8042')
+        return settings
     }
 
-    getRedisUrl() {
-        return `redis://${this.appSettings.redis.host}:${this.appSettings.redis.port}`
+    async getRedisUrl() {
+        const settings = await this.getSettings()
+        return settings.redisUrl
     }
 
-    getRabbitMqUrl() {
-        return `amqp://${this.appSettings.rabbitMq.host}:${this.appSettings.rabbitMq.port}/`
+    async getRabbitMqUrl() {
+        const settings = await this.getSettings()
+        return settings.rabbitmqUrl
     }
 
-    getOrthancUrl() {
-        return `http://${this.appSettings.orthanc.host}:${this.appSettings.orthanc.port}`
+    async getOrthancUrl() {
+        const settings = await this.getSettings()
+        return settings.orthancUrl
     }
 
-    getLogstashUrl() {
-        return `http://${this.appSettings.logstash.host}:${this.appSettings.logstash.port}`
+    async getLogstashUrl() {
+        const settings = await this.getSettings()
+        return `http://${APP_SETTINGS.logstash.host}:${APP_SETTINGS.logstash.port}`
     }
 
+    async startCeleryTask(taskName: string, args: any[]) {
+        let celeryClient = Celery.createClient({
+            brokerUrl: await this.getRabbitMqUrl(),
+            resultBackend: await this.getRedisUrl(),
+        });
+        const task: Celery.Task<string> = celeryClient.createTask<string>(taskName);
+
+        task.applyAsync({
+            args: args,
+            kwargs: {}
+        });
+    }
 }

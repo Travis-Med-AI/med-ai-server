@@ -10,6 +10,7 @@ import { EvalFactory } from "../factories/eval.factory";
 import { ResponseFactory } from "../factories/response.factory";
 import _ from 'lodash';
 import { Study } from "../entity/Study.entity";
+import { AppSettingsService } from "./appSettings.service";
 
 
 @injectable()
@@ -22,6 +23,7 @@ export class EvalService {
         @inject(TYPES.ModelService) private modelService: ModelService,
         @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
         @inject(TYPES.ResponseFactory) private responseFactory: ResponseFactory,
+        @inject(TYPES.AppSettingsService) private settings: AppSettingsService,
     ) {}
 
     async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
@@ -68,15 +70,15 @@ export class EvalService {
         let study = await this.studyService.getStudy(studyId);
         let model = await this.modelService.getModel(modelId);
 
-        this.db.startCeleryTask('runner.evaluate_dicom', [model.id, study.orthancStudyId])
+        this.settings.startCeleryTask('runner.evaluate_dicom', [model.id, study.orthancStudyId])
 
         return {message: 'started task'}
     }
 
     async getEvalLog(evalId:number): Promise<string[]> {
-        let evalulation = await this.evalRepository.findOne({id: evalId});
+        let evaluation = await this.evalRepository.findOne({id: evalId});
 
-        return evalulation.stdout;
+        return evaluation.stdout;
     }
 
 }

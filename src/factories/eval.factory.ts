@@ -25,6 +25,7 @@ export class EvalFactory {
     }
 
     buildStudyEvalViewModel(evaluation: StudyEvaluation, orthancId: string): StudyEvalVM {
+
         return {
             id: evaluation.id,
             orthancId,

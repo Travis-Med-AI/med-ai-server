@@ -12,11 +12,12 @@ import express from 'express';
 import log4js, { Logger } from 'log4js';
 import http from 'http';
 import socketIO, { Server, Socket } from 'socket.io';
-import { AppSettingsService } from './services/appSettings.service';
 import { RealtimeService } from './services/realtime.service';
 import { Notifications } from 'med-ai-common';
 import path from 'path';
 
+
+const postgresUrl = process.env.POSTGRES_URL || "postgresql://test:test@postgres-db/ai"
 
 const configServer = (app) => {
     app.use(bodyParser.urlencoded({
@@ -37,13 +38,12 @@ const configError = (app) => {
 }
 
 const setUpLogging = () => {
-    let appSettingsService = container.get<AppSettingsService>(TYPES.AppSettingsService)
     log4js.configure({
         appenders: {
           logstash: {
             type: '@log4js-node/logstashudp',
-            host: appSettingsService.appSettings.logstash.host,
-            port: appSettingsService.appSettings.logstash.port
+            host: APP_SETTINGS.logstash.host,
+            port: APP_SETTINGS.logstash.port
           }
         },
         categories: {

@@ -24,7 +24,7 @@ export class StudyService {
     ) {}
 
     async evaluateStudies(modelId: number) {
-        this.db.startCeleryTask('runner.evaluate_studies', [modelId])
+        this.settingsService.startCeleryTask('runner.evaluate_studies', [modelId])
         return `started task for model ${modelId}`
     }
 

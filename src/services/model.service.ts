@@ -130,6 +130,13 @@ export class ModelService {
 
     async toggleQuickstart(modelId: number): Promise<ModelViewModel> {
         let model = await this.modelRepository.findOne({id: modelId});
+        if(model.quickStart) {
+            await this.realtimeService.sendModelMessage(modelId.toString(), {
+                files: [],
+                ids: [],
+                type: 'STOP'
+            })
+        }
         model.quickStart = !model.quickStart
         model = await this.modelRepository.save(model)
         return this.modelFactory.buildModelViewModel(model)
