@@ -21,7 +21,8 @@ export class AppSettingsService {
         let settings = await this.settingsRepository.findOne() || {} as any;
         settings.redisUrl = process.env.REDIS_URL as string || _.get(settings, 'redisUrl', 'redis://redis:6379')
         settings.rabbitmqUrl = process.env.RABBITMQ_URL as string || _.get(settings, 'rabbitmqUrl', 'amqp://guest:guest@rabbitmq:5672')
-        settings.orthancUrl = process.env.ORTHANC_URL as string || _.get(settings, 'orthancUrl', 'http://orthanc:8042')
+        // settings.orthancUrl = process.env.ORTHANC_URL as string || _.get(settings, 'orthancUrl', 'http://orthanc:8042')
+        settings.orthancUrl = process.env.ORTHANC_URL as string || 'http://orthanc:8042'
         return settings
     }
 

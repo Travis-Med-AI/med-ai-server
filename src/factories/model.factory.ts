@@ -10,7 +10,7 @@ import { Classifier } from '../entity/Classifier.entity';
 export class ModelFactory {
 
     buildModel(modelVM: ModelManifestItem): Model {
-        let { tag, input, output, inputType, displayName } = modelVM;
+        let { tag, input, output, inputType, displayName, outputKeys } = modelVM;
 
         let model = new Model();
         model.image = tag;
@@ -20,6 +20,7 @@ export class ModelFactory {
         model.output = output; 
         model.hasImageOutput = modelVM.hasImageOutput
         model.modality = modelVM.modality
+        model.outputKeys = outputKeys
 
         return model;
     }
@@ -37,7 +38,8 @@ export class ModelFactory {
             pulled: model.pulled,
             failed: model.failed,
             quickstart: model.quickStart,
-            running: model.running
+            running: model.running,
+            outputKeys: model.outputKeys
         }
     }
 

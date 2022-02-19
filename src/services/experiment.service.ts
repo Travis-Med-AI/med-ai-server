@@ -1,7 +1,13 @@
 import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
 import { DatabaseService } from "./database.service";
-import { ExperimentStatus, ExperimentViewModel, PagedResponse, StudyType, StudyViewModel } from "med-ai-common";
+import { 
+    ExperimentStatus, 
+    ExperimentViewModel, 
+    PagedResponse, 
+    StudyType, 
+    StudyViewModel,
+    ExperimentStatsViewModel } from "med-ai-common";
 import _, { create } from 'lodash';
 import { Experiment } from "../entity/Experiment.entity";
 import { StudyService } from "./study.service";
@@ -13,6 +19,8 @@ import { ExperimentFactory } from "../factories/experiment.factory";
 import { EvalService } from "./eval.service";
 import { In } from "typeorm";
 import { Parser } from 'json2csv';
+import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
+import { StudyLabel } from "../entity/StudyLabel.entity";
 
 
 @injectable()
@@ -41,9 +49,7 @@ export class ExperimentService {
             let studyIds = e.studies.map(s => s.id);
             let evaluations = [];
             if (studyIds.length > 0) {
-                evaluations = await this.evalService.evalRepository.find({
-                    id: In(studyIds)
-                })
+                evaluations = await this.evalService.getEvalsByStudyIds(studyIds)
             }
             return this.experimentFactory.buildExperimentViewModel(e, evaluations);
         });
@@ -68,25 +74,27 @@ export class ExperimentService {
         return this.responseFactory.buildPagedResponse(models, studies[1])
     }
 
-    async getUnusedStudies(experimentId: number, page: number=0, pageSize: number=15, searchString: string='', studyType: StudyType): Promise<PagedResponse<any>> { 
+    async getUnusedStudies(experimentId: number, page: number=0, pageSize: number=15, searchString: string='', studyType: StudyType, modality: string): Promise<PagedResponse<any>> { 
         let query = this.studyRepository.createQueryBuilder('study')
         .leftJoin('experiment_studies_study', 'es', 'es.studyId = study.id')
         .where('es."experimentId" is null')
-        if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
-        
+
         if(searchString) {
             query = query
                 .andWhere(`"patientId" ILIKE '%${searchString}%'
                             OR "orthancStudyId" ILIKE '%${searchString}%'
                             OR "type" ILIKE '%${searchString}%'
-                            OR "modality" ILIKE '%${searchString}%'`)    
-                .skip(page)
-                .take(pageSize)
+                            OR "modality" ILIKE '%${searchString}%'`)
+            if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
+            if(modality) query = query.andWhere(`study.modality = '${modality}'`)  
+            query.skip(page).take(pageSize)
         } else {
-            query = query
-            .orWhere('es."experimentId"<> :experimentId', {experimentId})
-            .skip(page)
-            .take(pageSize)
+            query = query.orWhere('es."experimentId"<> :experimentId', {experimentId})
+
+            if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
+            if(modality) query = query.andWhere(`study.modality = '${modality}'`) 
+
+            query.skip(page).take(pageSize)
         }
 
 
@@ -137,36 +145,30 @@ export class ExperimentService {
         let probs = _.get(evals[0], 'modelOutput.class_probabilities')
 
 
-        let extraFields = []
-
-        evals.forEach(e => {
-            let prob = _.get(e, 'modelOutput.class_probabilities', {})
-            let kvArray = Object.keys(prob).map(k => ({value: k, label: k}))
-            extraFields = _.concat(probs, kvArray)
-        });
-
-        extraFields = _.uniqBy(evals, 'value')
-
         let fields = [
             {value:'studyUid', label: 'Study UID'},
             {value:'seriesUid', label: 'Series UID'},
             {value:'patientId', label: 'Patient Id'},
             {value:'orthancId', label: 'Orthanc Study Id'},
             {value:'diagnosis', label: 'Diagnosis'},
-            ...extraFields
+            {value:'classProbs', label: 'Class Probabilities'},
         ]
 
         const json2csv = new Parser({fields})
 
         return json2csv.parse(
-            evals.map(e => ({
-                studyUid: _.get(e, 'study.studyUid'),
-                seriesUid: _.get(e, 'study.seriesUid'),
-                patientId: _.get(e, 'study.patientId'),
-                orthancId: _.get(e, 'study.orthancStudyId'),
-                diagnosis: _.get(e, 'modelOutput.display', '').replace(/,/g, '\,'),
-                ...e.modelOutput.class_probabilities
-            }))
+            evals.map(e => {
+                let diagnosis = _.get(e, 'modelOutput.display', '')
+                let probs = JSON.stringify(_.get(e, 'modelOutput.class_probabilities', {}))
+                return {
+                    studyUid: _.get(e, 'study.studyUid'),
+                    seriesUid: _.get(e, 'study.seriesUid'),
+                    patientId: _.get(e, 'study.patientId'),
+                    orthancId: _.get(e, 'study.orthancStudyId'),
+                    diagnosis: diagnosis.replace(/,/g, '\,'),
+                    classProbs: probs.replace(/,/g, '\,'),
+                }
+            })
         )
     }
 
@@ -192,12 +194,11 @@ export class ExperimentService {
         return json2csv.parse(probs)
     }
 
-    async addAllToExperiment(experimentId: number, searchString: string='', studyType: StudyType) {
+    async addAllToExperiment(experimentId: number, searchString: string='', studyType: StudyType, modality: string = '') {
         let query = this.studyRepository.createQueryBuilder('study')
         .leftJoin('experiment_studies_study', 'es', 'es.studyId = study.id')
         .where('es."experimentId" is null')
 
-        if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
         
         if(searchString) {
             query = query
@@ -206,10 +207,20 @@ export class ExperimentService {
                             OR "type" ILIKE '%${searchString}%'
                             OR "modality" ILIKE '%${searchString}%'`)    
         } 
-
+        if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
+        if(modality) query = query.andWhere(`study.modality = '${modality}'`) 
         let studies = await query.getMany()
         await this.addStudiesToExperiment(experimentId, studies.map(s=>s.id))
 
         return {}
+    }
+
+
+    async getExperimentStats(experimentId: number) {
+        let experiment = await this.experimentRepository.findOne({id:experimentId});
+        let studyIds = experiment.studies.map(s => s.id)
+        let evals = await this.evalService.getEvalsByStudyIds(studyIds)
+        let labels = await this.studyService.getLabelsByStudyIds(studyIds)
+        return this.experimentFactory.buildEvalStats(evals, labels, experiment.model, experiment)
     }
 }

@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { JobService } from "../services/job.service";
 import { EvalJob } from "../entity/EvalJob.entity";
 import { Response } from "express";
-import { EvalJobViewModel, ExperimentViewModel, PagedResponse, StudyType, StudyViewModel } from "med-ai-common";
+import { EvalJobViewModel, ExperimentStatsViewModel, ExperimentViewModel, PagedResponse, StudyType, StudyViewModel } from "med-ai-common";
 import { ExperimentService } from "../services/experiment.service";
 import { Experiment } from "../entity/Experiment.entity";
 import fs from 'fs';
@@ -35,7 +35,8 @@ export class ExperimentController {
                                                            +_.get(req.query as _.Dictionary<string>, 'page'), 
                                                            +_.get(req.query as _.Dictionary<string>, 'pageSize'), 
                                                            _.get(req.query as _.Dictionary<string>, 'searchString', ''),
-                                                           _.get(req.query as _.Dictionary<StudyType>, 'studyType')); 
+                                                           _.get(req.query as _.Dictionary<StudyType>, 'studyType'),
+                                                           _.get(req.query as _.Dictionary<string>, 'modality')); 
     }
 
     @httpPost('')
@@ -49,10 +50,11 @@ export class ExperimentController {
     }
 
     @httpPost('/all-studies')
-    public async addAllToExperiment(req: CutsomRequest<{id: number, searchString: string, studyType: StudyType}>, res: Response): Promise<any> {
+    public async addAllToExperiment(req: CutsomRequest<{id: number, searchString: string, studyType: StudyType, modality: string}>, res: Response): Promise<any> {
         return this.experimentService.addAllToExperiment(_.get(req.body, 'id'),
                                                          _.get(req.body, 'searchString', ''),
-                                                         _.get(req.body, 'studyType'))
+                                                         _.get(req.body, 'studyType'),
+                                                         _.get(req.body, 'modality'))
     }
 
     @httpPost('/start')
@@ -75,6 +77,12 @@ export class ExperimentController {
         let csv = await this.experimentService.downloadResults(+_.get(req.query as _.Dictionary<string>, 'id'))
         res.header('Content-Type', 'text/csv');
         res.attachment('results.csv');
+        
         res.send(csv);
+    }
+
+    @httpPost('/experiment-stats')
+    public async  getEvalStats(req: CutsomRequest<{experimentId:number}>, res: Response): Promise<ExperimentStatsViewModel> {
+        return this.experimentService.getExperimentStats(req.body.experimentId)
     }
 }

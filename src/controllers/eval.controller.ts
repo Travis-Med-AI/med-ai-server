@@ -31,8 +31,9 @@ export class EvalController {
     @httpGet('/output-image')
     public async  getOutputImage(req: CutsomRequest<any>, res: Response) {
         let filePath = await this.evalService.getOutputImage(+req.query.evalId)
-        return fs.readFileSync(`/tmp/${filePath}`)
+        return fs.readFileSync(`/opt/images/${filePath}`)
     }
+
 
     @httpDelete('/:id')
     public async deleteEval(req: CutsomRequest<StudyEvalVM>, res:Response) {

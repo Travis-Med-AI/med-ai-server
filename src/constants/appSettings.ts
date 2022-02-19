@@ -19,5 +19,5 @@ export const APP_SETTINGS: AppSettings = {
         host: 'localhost',
         port: 5000
     },
-    imageSaveLocation: '/tmp/'
+    imageSaveLocation: '/opt/images/'
 }

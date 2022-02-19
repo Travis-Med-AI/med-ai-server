@@ -25,6 +25,9 @@ export class Model {
     @Column()
     output: ModelOutputs;
 
+    @Column({nullable: true, type: 'jsonb'})
+    outputKeys: any;
+
     @Column()
     hasImageOutput: boolean;
 

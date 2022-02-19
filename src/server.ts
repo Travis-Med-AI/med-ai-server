@@ -17,7 +17,6 @@ import { Notifications } from 'med-ai-common';
 import path from 'path';
 
 
-const postgresUrl = process.env.POSTGRES_URL || "postgresql://test:test@postgres-db/ai"
 
 const configServer = (app) => {
     app.use(bodyParser.urlencoded({
@@ -25,7 +24,7 @@ const configServer = (app) => {
     }));
     app.use(bodyParser.json());
     app.use(cors());
-    app.use('/static', express.static('/tmp'));
+    app.use('/static', express.static('/opt/images'));
 }
 
 const configError = (app) => {
@@ -71,7 +70,7 @@ createConnection().then(connection => {
     server.setErrorConfig(configError);
 
     let app = server.build();
-    app.use('/images', express.static(path.resolve('/tmp')));
+    app.use('/images', express.static(path.resolve('/opt/images')));
     let serverInstance = app.listen(APP_SETTINGS.port);
 
     let io = socketIO(serverInstance);

@@ -33,6 +33,15 @@ export class EvalService {
         return this.evalRepository.save(studyEval)
     }
 
+    async getEvalsByStudyIds(studyIds: number[]): Promise<StudyEvaluation[]> {
+        let query = this.evalRepository.createQueryBuilder('eval')
+        .leftJoinAndSelect('eval.study', 'study')
+        .where('study.id IN (:...studyIds)', {studyIds})
+        
+
+        return query.getMany();
+    }
+
     async getEvals(page: number, pageSize: number, searchString: string): Promise<PagedResponse<StudyEvalVM>> {
         let query = this.evalRepository.createQueryBuilder('eval')
         .innerJoinAndSelect('eval.study', 'study')

@@ -17,6 +17,9 @@ export class Study {
     studyUid: string;
 
     @Column({nullable: true})
+    accession: string;
+
+    @Column({nullable: true})
     seriesUid: string;
 
     @Column('text', {nullable: true})
@@ -25,8 +28,14 @@ export class Study {
     @Column( {nullable: true})
     modality: string;
 
+    @Column( {nullable: true})
+    description: string;
+
     @Column({default: () => false})
     failed: boolean;
+
+    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)"})
+    dateAdded: number;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastUpdate: number;
