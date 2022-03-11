@@ -57,7 +57,7 @@ const setUpLogging = () => {
 }
 
 createConnection().then(connection => {
-
+    console.log('created db connection')
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
     container.bind<Socket>(TYPES.SocketClient).toConstantValue({} as Socket);
     setUpLogging();
@@ -74,7 +74,7 @@ createConnection().then(connection => {
     let serverInstance = app.listen(APP_SETTINGS.port);
 
     let io = socketIO(serverInstance);
-
+    console.log('made it here')
 
     console.log(`server listening on port ${APP_SETTINGS.port}`);
     io.on('connection', (client) => {

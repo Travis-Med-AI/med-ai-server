@@ -48,10 +48,10 @@ export class ModelService {
             let pull = exec(`docker pull ${model.image}`, (err, stdout) => {
                 if(err) {
                     console.warn(err)
-                    this.modelRepository.update({image: model.image}, {pulled: false, failed: true})
+                    this.modelRepository.update({image: model.image}, {pulled: false, failedPull: true})
                 } else {
                     console.log(stdout)
-                    this.modelRepository.update({image: model.image}, {pulled: true, failed: false})
+                    this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
                     .then(out => {
                         this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, Notifications.modelReady)
                     })
@@ -76,7 +76,7 @@ export class ModelService {
 
     async setClassifier(modelName:string, modality: Modality): Promise<ModelViewModel> {
         let classifier = await this.classifierRepository.findOne({modality});
-        let model = await this.modelRepository.findOne({image: modelName, modality})
+        let model = await this.modelRepository.findOne({image: modelName})
 
         if(model == undefined) {
             let manifestItem = _.find(ModelManifest, m => m.tag === modelName)

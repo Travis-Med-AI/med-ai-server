@@ -1,5 +1,5 @@
 import { injectable, inject } from 'inversify';
-import { EvaluationStatus, StudyEvalVM, EvalJobViewModel, EvalJobStatus } from 'med-ai-common';
+import { EvaluationStatus, StudyEvalVM, EvalJobViewModel, EvalJobStatus, ModelViewModel } from 'med-ai-common';
 import { StudyEvaluation } from '../entity/StudyEvaluation.entity';
 import { TYPES } from '../constants/types';
 import { StudyFactory } from './study.factory';
@@ -24,7 +24,7 @@ export class EvalFactory {
         return studyEval
     }
 
-    buildStudyEvalViewModel(evaluation: StudyEvaluation, orthancId: string): StudyEvalVM {
+    buildStudyEvalViewModel(evaluation: StudyEvaluation, orthancId: string, model: ModelViewModel): StudyEvalVM {
 
         return {
             id: evaluation.id,
@@ -34,7 +34,8 @@ export class EvalFactory {
             imgOutputPath: evaluation.imgOutputPath,
             lastUpdate: evaluation.lastUpdate,
             logs: evaluation.stdout,
-            study: this.studyFactory.buildStudyViewModel(evaluation.study as Study)
+            study: this.studyFactory.buildStudyViewModel(evaluation.study as Study),
+            model: model
         }
     }
 
@@ -46,11 +47,12 @@ export class EvalFactory {
         return job;
     }
 
-    buildEvalJobVM(jobId: number, model: Model, running: boolean): EvalJobViewModel {
+    buildEvalJobVM(job: EvalJob, model: Model, running: boolean): EvalJobViewModel {
         return {
-            id: jobId,
+            id: job.id,
             model: this.modelFactory.buildModelViewModel(model),
-            running
+            running,
+            cpu: job.cpu
         }
     }
 }

@@ -1,5 +1,5 @@
 import {Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { StudyType } from "med-ai-common";
+import { StudyType, Modality } from "med-ai-common";
 
 
 @Entity()
@@ -26,7 +26,7 @@ export class Study {
     type: StudyType;    
     
     @Column( {nullable: true})
-    modality: string;
+    modality: Modality;
 
     @Column( {nullable: true})
     description: string;

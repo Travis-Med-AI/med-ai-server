@@ -11,6 +11,8 @@ import { ResponseFactory } from "../factories/response.factory";
 import _ from 'lodash';
 import { Study } from "../entity/Study.entity";
 import { AppSettingsService } from "./appSettings.service";
+import { ModelFactory } from "../factories/model.factory";
+import { Model } from "../entity/Model.entity";
 
 
 @injectable()
@@ -24,6 +26,7 @@ export class EvalService {
         @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
         @inject(TYPES.ResponseFactory) private responseFactory: ResponseFactory,
         @inject(TYPES.AppSettingsService) private settings: AppSettingsService,
+        @inject(TYPES.ModelFactory) private modelFactory: ModelFactory,
     ) {}
 
     async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
@@ -58,7 +61,8 @@ export class EvalService {
 
         let studyEvalVMs = _.map(evals[0], e => {
             let study = e.study as Study
-            return this.evalFactory.buildStudyEvalViewModel(e, study.orthancStudyId)
+            let model = this.modelFactory.buildModelViewModel(e.model as Model)
+            return this.evalFactory.buildStudyEvalViewModel(e, study.orthancStudyId, model)
         })
 
         return this.responseFactory.buildPagedResponse<StudyEvalVM>(studyEvalVMs, evals[1])

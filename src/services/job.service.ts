@@ -8,12 +8,14 @@ import { EvalJobViewModel } from "med-ai-common";
 import { UpdateResult, DeleteResult } from "typeorm";
 import { EvalFactory } from "../factories/eval.factory";
 import _ from 'lodash';
+import { ModelService } from "./model.service";
 
 
 @injectable()
 export class JobService {
     evalRepository = this.db.getRepository<StudyEvaluation>(StudyEvaluation);
     jobRepository = this.db.getRepository<EvalJob>(EvalJob);
+    modelRepository = this.db.getRepository<Model>(Model);
 
     constructor(
         @inject(TYPES.DatabaseService) private db: DatabaseService,
@@ -27,19 +29,25 @@ export class JobService {
                 id: "ASC",
         }});
 
-        return _.map(evalJobs, job => this.evalFactory.buildEvalJobVM(job.id, job.model as Model, job.running))
+        return _.map(evalJobs, job => this.evalFactory.buildEvalJobVM(job, job.model as Model, job.running))
     }
 
     async killJob(jobId): Promise<EvalJobViewModel> {
         let job = await this.jobRepository.findOneOrFail({id: jobId});
         job.running = false;
         job = await this.jobRepository.save(job);
-        return this.evalFactory.buildEvalJobVM(jobId, job.model as Model, false);
+        return this.evalFactory.buildEvalJobVM(job, job.model, false);
     }
 
     async startJob(jobId: number): Promise<{updated: number}> {
         let jobDB: UpdateResult = await this.jobRepository.update({id: jobId}, {running: true})
         return { updated: jobDB.affected }
+    }
+
+    async toggleCPU(jobId: number): Promise<{updated: number}> {
+        let jobDB: EvalJob = await this.jobRepository.findOne({id:jobId})
+        let result: UpdateResult = await this.jobRepository.update({id: jobId}, {cpu: !jobDB.cpu})
+        return { updated: result.affected }
     }
 
     async saveEvalJob(model: Model): Promise<EvalJob> {
@@ -48,6 +56,6 @@ export class JobService {
     }
 
     async deleteEvalJobByModelId(modelId: number): Promise<DeleteResult> {
-        return this.jobRepository.delete({model: modelId})
+        return this.jobRepository.delete({model: modelId as any})
     }
 }

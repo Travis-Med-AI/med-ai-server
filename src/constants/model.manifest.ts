@@ -72,7 +72,17 @@ export const ModelManifest: ModelManifestItem[] = [
         output: ModelOutputs.classProbabilities,
         hasImageOutput: true,
         outputKeys: []
-    },    
+    },   
+    {
+        tag: 'tclarke104/ptx-model-2022:0.1',
+        displayName: 'Pneumothorax Detection 2022',
+        input: StudyType.frontalCXR,
+        modality: Modality.C_XRAY,
+        inputType: ModelInputs.DICOM,
+        output: ModelOutputs.classProbabilities,
+        hasImageOutput: true,
+        outputKeys: []
+    },     
     {
         tag: 'tclarke104/pneumonia-model:0.1',
         displayName: 'Pneumonia Detection',

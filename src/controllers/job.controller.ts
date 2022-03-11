@@ -23,6 +23,11 @@ export class JobController {
         return this.jobService.startJob(req.body.id);
     }
 
+    @httpPost('/cpu')
+    public async toggleCPU(req: CutsomRequest<{id:number}>, res: Response): Promise<{updated: number}> {
+        return this.jobService.toggleCPU(req.body.id);
+    }
+
     @httpPost('/kill')
     public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJobViewModel> {
         return this.jobService.killJob(req.body.id);

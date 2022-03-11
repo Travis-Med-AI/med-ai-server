@@ -35,14 +35,14 @@ export class Model {
     pulled: boolean;
 
     @Column({default: false})
+    failedPull: boolean;
+
+    @Column({default: false})
     quickStart: boolean;
+
+    @Column({default: false})
+    quickStartRunning: boolean;
 
     @Column({default: 1})
     concurrency: number;
-
-    @Column({default: false})
-    running: boolean;
-
-    @Column({default: false})
-    failed: boolean;
 }
