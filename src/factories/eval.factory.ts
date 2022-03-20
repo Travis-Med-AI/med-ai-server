@@ -52,7 +52,8 @@ export class EvalFactory {
             id: job.id,
             model: this.modelFactory.buildModelViewModel(model),
             running,
-            cpu: job.cpu
+            cpu: job.cpu,
+            replicas: job.replicas
         }
     }
 }

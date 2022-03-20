@@ -5,7 +5,6 @@ services:
             context: .
             dockerfile: ./Dockerfile
         restart: unless-stopped
-        runtime: nvidia
         ports:
             - 8000:8000
         environment: 

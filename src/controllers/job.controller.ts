@@ -32,4 +32,9 @@ export class JobController {
     public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJobViewModel> {
         return this.jobService.killJob(req.body.id);
     }
+
+    @httpPost('/replicas')
+    public async updateReplicas(req: CutsomRequest<{id:number, replicas: number}>, res: Response): Promise<EvalJobViewModel> {
+        return this.jobService.changeReplicas(req.body.id, req.body.replicas);
+    }
 }

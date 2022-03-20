@@ -20,6 +20,9 @@ export class EvalJob {
     @Column({default: false})
     cpu: boolean;
 
+    @Column({default: 0})
+    replicas: number
+
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastRun: number;
 }

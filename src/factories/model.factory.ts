@@ -36,7 +36,6 @@ export class ModelFactory {
             inputType: model.inputType,
             modality: model.modality,
             pulled: model.pulled,
-            quickstart: model.quickStart,
             outputKeys: model.outputKeys,
             failedPull: model.failedPull
         }

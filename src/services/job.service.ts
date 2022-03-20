@@ -58,4 +58,12 @@ export class JobService {
     async deleteEvalJobByModelId(modelId: number): Promise<DeleteResult> {
         return this.jobRepository.delete({model: modelId as any})
     }
+
+
+    async changeReplicas(evalId: number, replicas: number): Promise<EvalJobViewModel> {
+        let job = await this.jobRepository.findOne({id: evalId});
+        job.replicas = replicas
+        job = await this.jobRepository.save(job)
+        return this.evalFactory.buildEvalJobVM(job, job.model, true)
+    }
 }

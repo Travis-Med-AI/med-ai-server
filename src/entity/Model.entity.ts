@@ -37,12 +37,6 @@ export class Model {
     @Column({default: false})
     failedPull: boolean;
 
-    @Column({default: false})
-    quickStart: boolean;
-
-    @Column({default: false})
-    quickStartRunning: boolean;
-
     @Column({default: 1})
     concurrency: number;
 }

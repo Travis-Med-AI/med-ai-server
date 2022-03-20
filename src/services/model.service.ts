@@ -44,20 +44,9 @@ export class ModelService {
         let model = this.modelFactory.buildModel(modelManifest);
 
         try {
-            // pull image from dockerhub
-            let pull = exec(`docker pull ${model.image}`, (err, stdout) => {
-                if(err) {
-                    console.warn(err)
-                    this.modelRepository.update({image: model.image}, {pulled: false, failedPull: true})
-                } else {
-                    console.log(stdout)
-                    this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
-                    .then(out => {
-                        this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, Notifications.modelReady)
-                    })
-                }
-
-            })
+            console.log('downloading model')
+            await this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
+            this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, Notifications.modelReady)
 
             let savedModel = await this.modelRepository.save(model);
 
@@ -128,17 +117,4 @@ export class ModelService {
     }
 
 
-    async toggleQuickstart(modelId: number): Promise<ModelViewModel> {
-        let model = await this.modelRepository.findOne({id: modelId});
-        if(model.quickStart) {
-            await this.realtimeService.sendModelMessage(modelId.toString(), {
-                files: [],
-                ids: [],
-                type: 'STOP'
-            })
-        }
-        model.quickStart = !model.quickStart
-        model = await this.modelRepository.save(model)
-        return this.modelFactory.buildModelViewModel(model)
-    }
 }
