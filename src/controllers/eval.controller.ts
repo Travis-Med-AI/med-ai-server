@@ -7,6 +7,7 @@ import { PagedResponse, StudyEvalVM } from "med-ai-common";
 import * as _ from 'lodash';
 import * as fs from 'fs';
 import { Response } from "express";
+import { Result } from "../interfaces/Results";
 
 
 @controller('/evals')
@@ -16,6 +17,11 @@ export class EvalController {
     @httpGet('')
     public async getStudyEval(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyEvalVM>> {
         return this.evalService.getEvals(+req.query.page, +req.query.pageSize,  _.get(req.query as _.Dictionary<string>, 'searchString', ''));
+    }
+
+    @httpPost('/results')
+    public async getResultsByModel(req: CutsomRequest<{modelId:number}>, res: Response): Promise<Result[]> {
+        return this.evalService.getResults(req.body.modelId);
     }
 
     @httpGet('/:modelId/:studyId') 

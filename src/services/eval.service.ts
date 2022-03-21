@@ -13,6 +13,7 @@ import { Study } from "../entity/Study.entity";
 import { AppSettingsService } from "./appSettings.service";
 import { ModelFactory } from "../factories/model.factory";
 import { Model } from "../entity/Model.entity";
+import { Result } from "../interfaces/Results";
 
 
 @injectable()
@@ -92,6 +93,13 @@ export class EvalService {
         let evaluation = await this.evalRepository.findOne({id: evalId});
 
         return evaluation.stdout;
+    }
+
+    async getResults(modelId: number): Promise<Result[]> {
+        let model = await this.modelService.getModel(modelId)
+        let evaluations = await this.evalRepository.find({model: model})
+
+        return evaluations.map(e => this.evalFactory.buildResult(e, model))
     }
 
 }

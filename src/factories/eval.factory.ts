@@ -7,6 +7,8 @@ import { Study } from '../entity/Study.entity';
 import { Model } from '../entity/Model.entity';
 import { ModelFactory } from './model.factory';
 import { EvalJob } from '../entity/EvalJob.entity';
+import { Result } from '../interfaces/Results';
+import * as _ from 'lodash';
 
 
 @injectable()
@@ -54,6 +56,16 @@ export class EvalFactory {
             running,
             cpu: job.cpu,
             replicas: job.replicas
+        }
+    }
+
+    buildResult(evaluation: StudyEvaluation, model: Model): Result {
+        return {
+            modelId: model.id,
+            output: _.get(evaluation.modelOutput, 'class_probabilities', {}),
+            seriesUID: evaluation.study.seriesUid,
+            studyUID: evaluation.study.studyUid
+
         }
     }
 }

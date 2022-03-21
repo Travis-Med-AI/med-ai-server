@@ -45,10 +45,10 @@ export class ModelService {
 
         try {
             console.log('downloading model')
-            await this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
             this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, Notifications.modelReady)
 
             let savedModel = await this.modelRepository.save(model);
+            await this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
 
             await this.jobService.saveEvalJob(model)
             return savedModel
