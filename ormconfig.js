@@ -2,7 +2,6 @@ var parseDbUrl = require("parse-database-url");
 var url = process.env.POSTGRES_URL || "postgresql://test:test@postgres-db:5432/ai"
 var dbConfig = parseDbUrl(url);
 
-console.log(dbConfig)
 module.exports = {
    "type": "postgres",
    "host": dbConfig.host,

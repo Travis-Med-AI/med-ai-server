@@ -1,5 +1,6 @@
 import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Unique, OneToOne} from "typeorm";
 import { Model } from "./Model.entity";
+import { User } from "./User.entity";
 
 @Entity()
 export class EvalJob {
@@ -23,6 +24,10 @@ export class EvalJob {
     @Column({default: 0})
     replicas: number
 
-    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
+    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    @JoinColumn()
+    user: number;
+
+    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)"})
     lastRun: number;
 }

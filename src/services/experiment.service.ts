@@ -21,6 +21,7 @@ import { In } from "typeorm";
 import { Parser } from 'json2csv';
 import { StudyEvaluation } from "../entity/StudyEvaluation.entity";
 import { StudyLabel } from "../entity/StudyLabel.entity";
+import { User } from "../entity/User.entity";
 
 
 @injectable()
@@ -39,8 +40,9 @@ export class ExperimentService {
 
     ) {}
 
-    async getExperiments(): Promise<ExperimentViewModel[]> {
+    async getExperiments(user: User): Promise<ExperimentViewModel[]> {
         let experiments = await this.experimentRepository.find({ 
+            where: {user},
             order: {
                 lastUpdate: "ASC",
         }});
@@ -49,7 +51,7 @@ export class ExperimentService {
             let studyIds = e.studies.map(s => s.id);
             let evaluations = [];
             if (studyIds.length > 0) {
-                evaluations = await this.evalService.getEvalsByStudyIds(studyIds)
+                evaluations = await this.evalService.getEvalsByStudyIds(studyIds, user)
             }
             return this.experimentFactory.buildExperimentViewModel(e, evaluations);
         });
@@ -57,10 +59,14 @@ export class ExperimentService {
         return Promise.all(promises)
     }
 
-    async getExperimentStudies(experimentId: number, page: number=0, pageSize: number=15, studyType?: StudyType): Promise<PagedResponse<any>> {
+    async getExperimentStudies(experimentId: number,
+                               user:User,
+                               page: number=0, 
+                               pageSize: number=15,
+                               studyType?: StudyType): Promise<PagedResponse<any>> {
         let query = this.studyRepository.createQueryBuilder('study')
         .innerJoin('experiment_studies_study', 'es', 'es.studyId = study.id')
-        .where('es.experimentId = :experimentId', {experimentId})
+        .andWhere('es.experimentId = :experimentId', {experimentId})
 
         if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
 
@@ -74,10 +80,18 @@ export class ExperimentService {
         return this.responseFactory.buildPagedResponse(models, studies[1])
     }
 
-    async getUnusedStudies(experimentId: number, page: number=0, pageSize: number=15, searchString: string='', studyType: StudyType, modality: string): Promise<PagedResponse<any>> { 
+    async getUnusedStudies(experimentId: number, 
+                           user: User,
+                           page: number=0, 
+                           pageSize: number=15, 
+                           searchString: string='', 
+                           studyType: StudyType, 
+                           modality: string
+                           ): Promise<PagedResponse<any>> { 
         let query = this.studyRepository.createQueryBuilder('study')
         .leftJoin('experiment_studies_study', 'es', 'es.studyId = study.id')
-        .where('es."experimentId" is null')
+        .where({user})
+        .andWhere('es."experimentId" is null')
 
         if(searchString) {
             query = query
@@ -103,44 +117,45 @@ export class ExperimentService {
         return this.responseFactory.buildPagedResponse(models, studies[1])
     }
 
-    async addExperiment(name: string, type: StudyType): Promise<ExperimentViewModel[]> {
-        let experiment = await this.experimentRepository.insert({name, type})
-        return this.getExperiments();
+    async addExperiment(name: string, type: StudyType, user: User): Promise<ExperimentViewModel[]> {
+        let experiment = await this.experimentRepository.insert({name, type, user: user.id})
+        return this.getExperiments(user);
     }
 
-    async addStudiesToExperiment(id: number, studyIds: number[]): Promise<PagedResponse<StudyViewModel>> {
-        let experiment = await this.experimentRepository.findOne({id})
+    async addStudiesToExperiment(id: number, studyIds: number[], user:User): Promise<PagedResponse<StudyViewModel>> {
+        let experiment = await this.experimentRepository.findOneOrFail({id, user: user.id})
         let ids = _.concat(studyIds, experiment.studies.map(s => s.id))
         ids = _.uniq(ids);
         experiment.studies = await this.studyService.getStudiesByIds(ids);
         experiment = await this.experimentRepository.save(experiment);
-        return this.getExperimentStudies(id);
+        console.log('made it here')
+        return this.getExperimentStudies(id, user);
     }
 
-    async startExperiment(experimentId: number, modelId: number): Promise<ExperimentViewModel> {
-        let model = await this.modelService.getModel(modelId);
-        await this.experimentRepository.update({id: experimentId}, {model, status: ExperimentStatus.RUNNING})
+    async startExperiment(experimentId: number, modelId: number, user: User): Promise<ExperimentViewModel> {
+        let model = await this.modelService.getModel(modelId, user);
+        await this.experimentRepository.update({id: experimentId, user: user.id}, {model, status: ExperimentStatus.RUNNING})
 
-        let experiment = await this.experimentRepository.findOne({id: experimentId});
+        let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id});
         return this.experimentFactory.buildExperimentViewModel(experiment);
     }
 
-    async stopExperiment(experimentId: number): Promise<ExperimentViewModel> {
-        await this.experimentRepository.update({id: experimentId}, {status: ExperimentStatus.NEW})
+    async stopExperiment(experimentId: number, user: User): Promise<ExperimentViewModel> {
+        await this.experimentRepository.update({id: experimentId, user: user.id}, {status: ExperimentStatus.NEW})
 
-        let experiment = await this.experimentRepository.findOne({id: experimentId});
+        let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id});
         return this.experimentFactory.buildExperimentViewModel(experiment);
     }
 
-    async deleteExperiment(experimentId: number): Promise<any> {
-        return this.experimentRepository.delete({id: experimentId})
+    async deleteExperiment(experimentId: number, user: User): Promise<any> {
+        return this.experimentRepository.delete({id: experimentId, user: user.id})
     }
 
-    async downloadResults(experimentId: number): Promise<any> {
-        let experiment = await this.experimentRepository.findOne({id: experimentId})
+    async downloadResults(experimentId: number, user: User): Promise<any> {
+        let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id})
 
         // TODO: FIX THIS!!!
-        let evals = await this.evalService.evalRepository.find()
+        let evals = await this.evalService.evalRepository.find({user: user.id})
 
         let probs = _.get(evals[0], 'modelOutput.class_probabilities')
 
@@ -172,10 +187,10 @@ export class ExperimentService {
         )
     }
 
-    async downloadKaggleCSV(experimentId: number) {
-        let experiment = await this.experimentRepository.findOne({id: experimentId})
+    async downloadKaggleCSV(experimentId: number, user:User) {
+        let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id})
 
-        let evals = await this.evalService.evalRepository.find()
+        let evals = await this.evalService.evalRepository.find({user: user.id})
 
         let probs = []
 
@@ -194,10 +209,11 @@ export class ExperimentService {
         return json2csv.parse(probs)
     }
 
-    async addAllToExperiment(experimentId: number, searchString: string='', studyType: StudyType, modality: string = '') {
+    async addAllToExperiment(experimentId: number, user:User, searchString: string='', studyType: StudyType, modality: string = '') {
         let query = this.studyRepository.createQueryBuilder('study')
         .leftJoin('experiment_studies_study', 'es', 'es.studyId = study.id')
-        .where('es."experimentId" is null')
+        .where({user})
+        .andWhere('es."experimentId" is null')
 
         
         if(searchString) {
@@ -210,17 +226,17 @@ export class ExperimentService {
         if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
         if(modality) query = query.andWhere(`study.modality = '${modality}'`) 
         let studies = await query.getMany()
-        await this.addStudiesToExperiment(experimentId, studies.map(s=>s.id))
+        await this.addStudiesToExperiment(experimentId, studies.map(s=>s.id), user)
 
         return {}
     }
 
 
-    async getExperimentStats(experimentId: number) {
-        let experiment = await this.experimentRepository.findOne({id:experimentId});
+    async getExperimentStats(experimentId: number, user: User) {
+        let experiment = await this.experimentRepository.findOne({id:experimentId, user: user.id});
         let studyIds = experiment.studies.map(s => s.id)
-        let evals = await this.evalService.getEvalsByStudyIds(studyIds)
-        let labels = await this.studyService.getLabelsByStudyIds(studyIds)
+        let evals = await this.evalService.getEvalsByStudyIds(studyIds,user)
+        let labels = await this.studyService.getLabelsByStudyIds(studyIds, user)
         return this.experimentFactory.buildEvalStats(evals, labels, experiment.model, experiment)
     }
 }

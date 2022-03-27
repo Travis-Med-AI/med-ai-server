@@ -10,11 +10,14 @@ import { DatabaseService } from "./database.service";
 import { Notification } from "../entity/Notification.entity";
 import { RealtimeFactory } from "../factories/realtime.factory";
 import { ModelMessage } from "../interfaces/ModelMessage";
+import { User } from "../entity/User.entity";
+import { UserService } from "./user.service";
 
 
 @injectable()
 export class RealtimeService {
     channel: amqp.Channel;
+    connection: amqp.Connection;
     notificationRepository = this.db.getRepository<Notification>(Notification);
 
     constructor(
@@ -23,25 +26,29 @@ export class RealtimeService {
         @inject(TYPES.Logger) private logger: Logger,
         @inject(TYPES.RealtimeFactory) private realtimeFactory: RealtimeFactory,
         @inject(TYPES.DatabaseService) private db: DatabaseService,
+        @inject(TYPES.UserService) private userService: UserService,
     ) {
     }
 
-    async sendNotification(message: string, type: Notifications) {
+    async sendNotification(message: string, type: Notifications, userId:number) {
         if(!_.includes(Object.values(Notifications), type)) {
             throw new Error('invalid notification')
         }
         let notificationDb;
+        let user = await this.userService.getUser(userId)
         if(type != Notifications.connected) {
-            notificationDb = await this.saveNotification(message, type, false)
+            notificationDb = await this.saveNotification(message, type, false, user)
         }
         let id = _.get(notificationDb, 'id', -1)
 
-        let notification = this.realtimeFactory.buildNotification(message, type, id)
-
+        let notification = this.realtimeFactory.buildNotification(message, type, id, userId)
+        console.log('sedning notification', JSON.stringify(notification))
         this.socket.emit(Sockets.notifications, notification);
-        
-        let allNotifications = await this.getNotifications();
-        this.socket.emit(Sockets.allNotifications, allNotifications)
+        let notifications = []
+        if (user) {
+            notifications = await this.getNotifications(user);
+            this.socket.emit(Sockets.allNotifications, notifications)
+        }
     }
 
     async sendModelLog(msg: ModelLogMessage) {
@@ -50,16 +57,21 @@ export class RealtimeService {
     }
 
     async getChannel() {
-        let connection = await amqp.connect(await this.appSettings.getRabbitMqUrl())
-        let channel = await connection.createChannel()
+        if(this.connection){
+            this.connection.close()
+            console.log('closing connection')
+        }
+        this.connection = await amqp.connect(await this.appSettings.getRabbitMqUrl())
+        let channel = await this.connection.createChannel()
         this.channel = channel;
+        console.log('getting channel')
     }
 
     async setupRabbitMq() {
         // connect to rabbitmq
         await this.getChannel()
-        this.handleNotifications()
         this.handleModelLogs()
+        this.handleNotifications()
     }
 
     handleNotifications() {
@@ -69,9 +81,10 @@ export class RealtimeService {
         });
         this.channel.consume(queue, (msg) => {
             let message: NotificationMessage = JSON.parse(msg.content.toString())
-            this.sendNotification(message.message, message.type).then(n => 
-                this.logger.info(`Socketio emitted message: ${msg.content.toString()}`))
-
+            this.sendNotification(message.message, message.type, message.userId).then(n => {
+                console.log(`Socketio emitted message: ${msg.content.toString()}`)
+                this.logger.info(`Socketio emitted message: ${msg.content.toString()}`)
+            })
         }, {noAck:true})
     }
 
@@ -88,28 +101,28 @@ export class RealtimeService {
         }, {noAck:true})
     }
 
-    async saveNotification(message: string, type: Notifications, read:boolean) {
-        let notifDB = this.realtimeFactory.buildNotificationModel(message, type, read);
+    async saveNotification(message: string, type: Notifications, read:boolean, user: User) {
+        let notifDB = this.realtimeFactory.buildNotificationModel(message, type, read, _.get(user, 'id', null));
         return this.notificationRepository.save(notifDB)
     }
 
-    async readNotification(notificationId: number): Promise<NotificationMessage[]> {
-        await this.notificationRepository.update({id: notificationId}, { read: true})
-        let allNotifications = await this.getNotifications();
+    async readNotification(notificationId: number, user: User): Promise<NotificationMessage[]> {
+        await this.notificationRepository.update({id: notificationId, user: user.id}, { read: true})
+        let allNotifications = await this.getNotifications(user);
         this.socket.emit(Sockets.allNotifications, allNotifications);
         return allNotifications;
     }
 
-    async readAllNotifications(): Promise<NotificationMessage[]> {
-        await this.notificationRepository.update({}, {read: true})
-        let allNotifications = await this.getNotifications();
+    async readAllNotifications(user: User): Promise<NotificationMessage[]> {
+        await this.notificationRepository.update({user: user.id}, {read: true})
+        let allNotifications = await this.getNotifications(user);
         this.socket.emit(Sockets.allNotifications, allNotifications);
         return allNotifications;
     }
 
-    async getNotifications(): Promise<NotificationMessage[]> {
-        let notifs = await this.notificationRepository.find({read: false})
-        return notifs.map(n => this.realtimeFactory.buildNotification(n.message, n.type, n.id))
+async getNotifications(user: User): Promise<NotificationMessage[]> {
+        let notifs = await this.notificationRepository.find({read: false, user: user.id})
+        return notifs.map(n => this.realtimeFactory.buildNotification(n.message, n.type, n.id, user.id))
     }
 
     async sendModelMessage(queueName, message: ModelMessage) {

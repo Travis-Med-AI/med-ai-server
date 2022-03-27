@@ -2,6 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, Unique, M
 import { Model } from "./Model.entity";
 import { ExperimentStatus, StudyType } from "med-ai-common";
 import { Study } from "./Study.entity";
+import { User } from "./User.entity";
 
 
 @Entity()
@@ -30,6 +31,10 @@ export class Experiment {
                { eager: true, nullable: true })
     @JoinColumn()
     model: Model
+
+    @ManyToOne(type => User, user => user.id, {cascade: true})
+    @JoinColumn()
+    user: number;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)"})
     createdDate: number;

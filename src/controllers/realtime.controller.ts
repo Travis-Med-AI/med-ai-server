@@ -14,19 +14,19 @@ import { RealtimeService } from "../services/realtime.service";
 export class RealtimeController {
     constructor(@inject(TYPES.RealtimeService) private rtService: RealtimeService) {}
 
-    @httpGet('/notifications')
-    public async getNotifications(req: Request<any>, res: Response): Promise<NotificationMessage[]> {
-        return this.rtService.getNotifications();
+    @httpGet('/notifications', TYPES.AuthMiddleware)
+    public async getNotifications(req: CutsomRequest<any>, res: Response): Promise<NotificationMessage[]> {
+        return this.rtService.getNotifications(req.user);
     }
 
-    @httpPost('/notifications/read')
+    @httpPost('/notifications/read', TYPES.AuthMiddleware)
     public async markNotifRead(req: CutsomRequest<{id: number}>, res: Response): Promise<NotificationMessage[]> {
-        return this.rtService.readNotification(req.body.id);
+        return this.rtService.readNotification(req.body.id, req.user);
     }
 
-    @httpGet('/notifications/read-all')
+    @httpGet('/notifications/read-all', TYPES.AuthMiddleware)
     public async markAllNotifRead(req: CutsomRequest<any>, res: Response): Promise<NotificationMessage[]> {
-        return this.rtService.readAllNotifications();
+        return this.rtService.readAllNotifications(req.user);
     }
 
 }

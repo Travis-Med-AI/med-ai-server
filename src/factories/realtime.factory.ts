@@ -7,15 +7,16 @@ import { Notification } from '../entity/Notification.entity';
 @injectable()
 export class RealtimeFactory {
 
-    buildNotification(message: string, type: Notifications, id: number): NotificationMessage {
-        return { message, type, id }
+    buildNotification(message: string, type: Notifications, id: number, userId:number): NotificationMessage {
+        return { message, type, id, userId }
     }
 
-    buildNotificationModel(message: string, type: Notifications, read = false): Notification {
+    buildNotificationModel(message: string, type: Notifications, read = false, user:number): Notification {
         let notification = new Notification();
         notification.message = message;
         notification.type = type
         notification.read = read;
+        notification.user = user;
 
         return notification;
     }

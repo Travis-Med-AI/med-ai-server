@@ -9,6 +9,7 @@ import { ModelFactory } from './model.factory';
 import { EvalJob } from '../entity/EvalJob.entity';
 import { Result } from '../interfaces/Results';
 import * as _ from 'lodash';
+import { User } from '../entity/User.entity';
 
 
 @injectable()
@@ -16,12 +17,13 @@ export class EvalFactory {
     constructor(@inject(TYPES.StudyFactory) private studyFactory: StudyFactory,
                 @inject(TYPES.ModelFactory) private modelFactory: ModelFactory) {}
 
-    buildStudyEval(modelId: number, study: Study, status: EvaluationStatus, modelOutput?: JSON): StudyEvaluation {
+    buildStudyEval(modelId: number, study: Study, status: EvaluationStatus, user: number, modelOutput?: JSON): StudyEvaluation {
         let studyEval = new StudyEvaluation();
         studyEval.model = modelId;
         studyEval.study = study;
         if(modelOutput) studyEval.modelOutput;
         studyEval.status = status;
+        studyEval.user= user;
         
         return studyEval
     }
@@ -41,10 +43,11 @@ export class EvalFactory {
         }
     }
 
-    buildEvalJob(model: Model, running: boolean): EvalJob {
+    buildEvalJob(model: Model, running: boolean, user: number): EvalJob {
         let job = new EvalJob();
         job.model = model;
         job.running = running
+        job.user = user
 
         return job;
     }

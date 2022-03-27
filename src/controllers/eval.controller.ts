@@ -14,36 +14,37 @@ import { Result } from "../interfaces/Results";
 export class EvalController {
     constructor(@inject(TYPES.EvalService) private evalService: EvalService) {}
 
-    @httpGet('')
+    @httpGet('', TYPES.AuthMiddleware)
     public async getStudyEval(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyEvalVM>> {
-        return this.evalService.getEvals(+req.query.page, +req.query.pageSize,  _.get(req.query as _.Dictionary<string>, 'searchString', ''));
+        let searchString = _.get(req.query as _.Dictionary<string>, 'searchString', '')
+        return this.evalService.getEvals(+req.query.page, +req.query.pageSize, searchString, req.user);
     }
 
-    @httpPost('/results')
+    @httpPost('/results', TYPES.AuthMiddleware)
     public async getResultsByModel(req: CutsomRequest<{modelId:number}>, res: Response): Promise<Result[]> {
-        return this.evalService.getResults(req.body.modelId);
+        return this.evalService.getResults(req.body.modelId, req.user);
     }
 
-    @httpGet('/:modelId/:studyId') 
+    @httpGet('/:modelId/:studyId', TYPES.AuthMiddleware) 
     public async processDicom(req: CutsomRequest<any>, res: Response): Promise<{ message: string }> {
-        return this.evalService.processDicom(+req.params.modelId, +req.params.studyId);
+        return this.evalService.processDicom(+req.params.modelId, +req.params.studyId, req.user);
     }
 
-    @httpGet('/logs')
+    @httpGet('/logs', TYPES.AuthMiddleware)
     public async  getEvalLog(req: CutsomRequest<any>, res: Response) {
-        return this.evalService.getEvalLog(+req.query.evalId)
+        return this.evalService.getEvalLog(+req.query.evalId, req.user)
     }
 
-    @httpGet('/output-image')
+    @httpGet('/output-image', TYPES.AuthMiddleware)
     public async  getOutputImage(req: CutsomRequest<any>, res: Response) {
-        let filePath = await this.evalService.getOutputImage(+req.query.evalId)
+        let filePath = await this.evalService.getOutputImage(+req.query.evalId, req.user)
         return fs.readFileSync(`/opt/images/${filePath}`)
     }
 
 
-    @httpDelete('/:id')
+    @httpDelete('/:id', TYPES.AuthMiddleware)
     public async deleteEval(req: CutsomRequest<StudyEvalVM>, res:Response) {
-        return this.evalService.deleteEval(+req.params.id)
+        return this.evalService.deleteEval(+req.params.id, req.user)
     }
 
 }

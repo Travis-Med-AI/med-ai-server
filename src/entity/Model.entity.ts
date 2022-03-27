@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn} from "typeorm";
 import { ModelOutputs, StudyType, ModelInputs, Modality } from "med-ai-common";
+import { User } from "./User.entity";
 
 @Entity()
 export class Model {
@@ -33,6 +34,10 @@ export class Model {
 
     @Column({default: false})
     pulled: boolean;
+
+    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    @JoinColumn()
+    user: number;
 
     @Column({default: false})
     failedPull: boolean;

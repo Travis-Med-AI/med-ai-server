@@ -13,7 +13,6 @@ export class UserFactory {
         let user = new User();
         user.firstName = firstName;
         user.lastName = lastName;
-        user.age = age;
         user.email = email;
         user.password = hash;
         user.salt = salt;
@@ -22,13 +21,13 @@ export class UserFactory {
     }
 
     buildUserViewModel(user: User): UserViewModel{
-        let { id, firstName, lastName, email, age, roles } = user;
+        let { id, firstName, lastName, email, roles } = user;
         return {
             id,
             firstName,
             lastName,
             email,
-            age,
+            age: -1,
             roles
         }
     }

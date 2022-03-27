@@ -56,6 +56,8 @@ const setUpLogging = () => {
     container.bind<Logger>(TYPES.Logger).toConstantValue(logger);
 }
 
+console.log('connecting to db')
+
 createConnection().then(connection => {
     console.log('created db connection')
     container.bind<Connection>(TYPES.DatabaseConnection).toConstantValue(connection);
@@ -75,14 +77,14 @@ createConnection().then(connection => {
 
     let io = socketIO(serverInstance);
     console.log('made it here')
+    notifcationService.setupRabbitMq()
 
     console.log(`server listening on port ${APP_SETTINGS.port}`);
     io.on('connection', (client) => {
       console.log('connected client', client.id)
       container.rebind<Socket>(TYPES.SocketClient).toConstantValue(client);
       notifcationService.socket = client;
-      notifcationService.sendNotification('connected to server', Notifications.connected)
-      notifcationService.setupRabbitMq()
+      notifcationService.sendNotification('connected to server', Notifications.connected, -1)
     })
 
 })

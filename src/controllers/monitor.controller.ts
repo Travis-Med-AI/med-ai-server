@@ -14,13 +14,13 @@ import { CpuInfoViewModel } from "med-ai-common";
 export class MonitorController {
     constructor(@inject(TYPES.MonitorService) private monitorService: MonitorSerivice) {}
 
-    @httpGet('/gpu')
+    @httpGet('/gpu', TYPES.AuthMiddleware)
     public async getGpuTemp(req: CutsomRequest<any>, res: Response): Promise<GpuInfoViewModel> {
         let info = await this.monitorService.getGPUInfo();
         return info;
     }
 
-    @httpGet('/cpu')
+    @httpGet('/cpu', TYPES.AuthMiddleware)
     public async getCpuInfo(req: CutsomRequest<any>, res: Response): Promise<CpuInfoViewModel> {
         let info = await this.monitorService.getCpuInfo();
         return info;

@@ -2,6 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne, Unique} f
 import { Model } from "./Model.entity";
 import { EvaluationStatus } from "med-ai-common";
 import { Study } from "./Study.entity";
+import { User } from "./User.entity";
 
 
 @Entity()
@@ -30,6 +31,10 @@ export class StudyEvaluation {
 
     @Column({nullable: true})
     imgOutputPath: string
+
+    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
+    @JoinColumn()
+    user: number;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastUpdate: number;

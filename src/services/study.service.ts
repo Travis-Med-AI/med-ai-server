@@ -13,6 +13,7 @@ import * as CSV from 'csv-string';
 import { ModelService } from "./model.service";
 import { LabelRow } from "../interfaces/LabelCSV";
 import { StudyLabel } from "../entity/StudyLabel.entity";
+import { User } from "../entity/User.entity";
 
 
 @injectable()
@@ -34,7 +35,11 @@ export class StudyService {
         return `started task for model ${modelId}`
     }
 
-    async getStudies(page: string, pageSize: string, searchString: string, studyType: StudyType): Promise<PagedResponse<StudyViewModel>> {
+    async getStudies(page: string, 
+                     pageSize: string, 
+                     searchString: string, 
+                     studyType: StudyType,
+                     user: User): Promise<PagedResponse<StudyViewModel>> {
         let query = this.studyRepository.createQueryBuilder('study').where('study.type is not null')
 
         if(studyType) query = query.andWhere(`study.type = '${studyType}'`)
@@ -44,6 +49,7 @@ export class StudyService {
             .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
             .orWhere('study."modality"::TEXT like :modality', {modality: `%${searchString}%`})
             .orWhere('study."type"::TEXT like :type', {type: `%${searchString}%`})
+            .andWhere('study.userId = :userId', {userId: user.id})
         }
 
 
@@ -60,7 +66,7 @@ export class StudyService {
         return this.responseFactory.buildPagedResponse(studyViewModels, studies[1])
     }
 
-    async deleteStudy(studyId:number): Promise<any> {
+    async deleteStudy(studyId:number, user: User): Promise<any> {
         return await this.studyRepository.delete({id: studyId})
     }
 
@@ -83,13 +89,14 @@ export class StudyService {
         return await this.studyRepository.findByIds(studIds)
     }
 
-    async checkForSeriesUID(csv: string, modelId: number): Promise<csvVerification>{
+    async checkForSeriesUID(csv: string, modelId: number, user:User): Promise<csvVerification>{
         let parse_mapped = await this.parseLabels(csv)
         let seriesIds: string[] = parse_mapped.map(r=>r.seriesUID.trim())
 
-        let model = await this.modelService.getModel(modelId);
+        let model = await this.modelService.getModel(modelId, user);
         let studies = await this.studyRepository.createQueryBuilder("study")
-        .where("study.seriesUid IN (:...seriesIds)", { seriesIds })
+        .where({user})
+        .andWhere("study.seriesUid IN (:...seriesIds)", { seriesIds })
         .getMany();
 
         return this.studyFactory.buildCSVVerification(studies.length, parse_mapped, model.outputKeys)
@@ -101,13 +108,13 @@ export class StudyService {
         return parsed.map(r => this.studyFactory.buildLabelRow([...headers], r))
     }
 
-    async saveLabels(csv: string, modelId: number): Promise<{saveCount: number}> {
+    async saveLabels(csv: string, modelId: number, user: User): Promise<{saveCount: number}> {
         let parse_mapped = await this.parseLabels(csv)
-        let model = await this.modelService.getModel(modelId);
+        let model = await this.modelService.getModel(modelId, user);
         let saveCount = 0
         for (const row of parse_mapped){
             let series = await this.studyRepository.findOneOrFail({seriesUid: row.seriesUID})
-            let studyLabel = this.studyFactory.buildStudyLabel(row, series, model)
+            let studyLabel = this.studyFactory.buildStudyLabel(row, series, model, user.id)
             if (Object.keys(studyLabel.label).length) {
                 await this.studyLabelRepository.save(studyLabel)
                 saveCount++
@@ -116,12 +123,22 @@ export class StudyService {
         return {saveCount}
     }
 
-    async getLabelsByStudyIds(studyIds: number[]): Promise<StudyLabel[]> {
+    async getLabelsByStudyIds(studyIds: number[], user: User): Promise<StudyLabel[]> {
         let query = this.studyLabelRepository.createQueryBuilder("studyLabel")
         .innerJoinAndSelect('studyLabel.study', 'study')
         .innerJoinAndSelect('studyLabel.model', 'model')
-        .where("studyLabel.id IN (:...studyIds)", { studyIds });
+        .where({user})
+        .andWhere("studyLabel.id IN (:...studyIds)", { studyIds })
 
         return query.getMany()
+    }
+
+    async getModalities(): Promise<string[]> {
+        let modalities = await this.studyRepository.createQueryBuilder("study")
+                                                   .select('modality')
+                                                   .distinct(true)
+                                                   .getRawMany<{modality:string}>()
+
+        return modalities.map(m=>m.modality)
     }
 }

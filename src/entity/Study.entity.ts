@@ -1,5 +1,6 @@
-import {Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "typeorm";
 import { StudyType, Modality } from "med-ai-common";
+import { User } from "./User.entity";
 
 
 @Entity()

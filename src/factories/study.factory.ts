@@ -52,7 +52,7 @@ export class StudyFactory {
         }
     }
 
-    buildStudyLabel(labelRow: LabelRow, series: Study, model: Model):StudyLabel {
+    buildStudyLabel(labelRow: LabelRow, series: Study, model: Model, user: number):StudyLabel {
         let filteredLabels = {}
         console.log(typeof model.outputKeys)
         model.outputKeys.forEach(k => {
@@ -63,7 +63,8 @@ export class StudyFactory {
         return {
             model,
             study: series,
-            label: filteredLabels
+            label: filteredLabels,
+            user
         }
     }
 

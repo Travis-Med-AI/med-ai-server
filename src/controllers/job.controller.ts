@@ -13,28 +13,28 @@ import { EvalJobViewModel } from "med-ai-common";
 export class JobController {
     constructor(@inject(TYPES.JobService) private jobService: JobService) {}
 
-    @httpGet('')
+    @httpGet('', TYPES.AuthMiddleware)
     public async getEvalJobs(req: CutsomRequest<any>, res: Response): Promise<EvalJobViewModel[]> {
-        return this.jobService.getEvalJobs();
+        return this.jobService.getEvalJobs(req.user);
     }
 
-    @httpPost('/start')
+    @httpPost('/start', TYPES.AuthMiddleware)
     public async startJob(req: CutsomRequest<{id:number}>, res: Response): Promise<{updated: number}> {
-        return this.jobService.startJob(req.body.id);
+        return this.jobService.startJob(req.body.id, req.user);
     }
 
-    @httpPost('/cpu')
+    @httpPost('/cpu', TYPES.AuthMiddleware)
     public async toggleCPU(req: CutsomRequest<{id:number}>, res: Response): Promise<{updated: number}> {
-        return this.jobService.toggleCPU(req.body.id);
+        return this.jobService.toggleCPU(req.body.id, req.user);
     }
 
-    @httpPost('/kill')
+    @httpPost('/kill', TYPES.AuthMiddleware)
     public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJobViewModel> {
-        return this.jobService.killJob(req.body.id);
+        return this.jobService.killJob(req.body.id, req.user);
     }
 
-    @httpPost('/replicas')
+    @httpPost('/replicas', TYPES.AuthMiddleware)
     public async updateReplicas(req: CutsomRequest<{id:number, replicas: number}>, res: Response): Promise<EvalJobViewModel> {
-        return this.jobService.changeReplicas(req.body.id, req.body.replicas);
+        return this.jobService.changeReplicas(req.body.id, req.body.replicas, req.user);
     }
 }

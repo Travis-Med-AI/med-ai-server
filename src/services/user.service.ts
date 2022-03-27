@@ -38,7 +38,7 @@ export class UserService {
         return this.userFactory.buildUserViewModel(savedUser);
     }
 
-    async signIn(email: string, newPassword: string): Promise<{token: string}> {
+    async signIn(email: string, newPassword: string): Promise<{token: string, expiration: number}> {
         // find user in db
         let {id, password, salt} = await this.userRepository.findOneOrFail({email});
         
@@ -49,13 +49,18 @@ export class UserService {
         // generate and send token
         const token = this.generateToken(id);
 
-        return {token}
+        return token
     }
 
     async getUsers(): Promise<UserViewModel[]> {
         // find user and map to user viewmodel
         let users = await this.userRepository.find();
         return users.map(this.userFactory.buildUserViewModel)
+    }
+
+    async getUser(userId: number): Promise<User> {
+        let user = await this.userRepository.findOne({id: userId});
+        return user
     }
 
     async saveRole(name: ROLES, description: string): Promise<Role> {
@@ -82,8 +87,10 @@ export class UserService {
         return {hash: hashValue, salt};
     }
 
-    generateToken(userId: number): string {
-        const token = jwt.sign({id: userId}, APP_SETTINGS.secret, { expiresIn: '1h' });
-        return token;
+    generateToken(userId: number): {token: string, expiration: number} {
+        const token = jwt.sign({id: userId}, APP_SETTINGS.secret, { expiresIn: '48h' });
+        const expiration = Date.now() + (48 * 60 * 60 * 1000)
+
+        return {token, expiration};
     }
 }
