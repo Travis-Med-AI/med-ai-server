@@ -57,6 +57,7 @@ export class EvalService {
         .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
         .orWhere('eval."modelOutput"::TEXT like :output', {output: `%${searchString}%`})
         .addOrderBy('eval.lastUpdate', 'DESC')
+        .addOrderBy('eval.status', 'DESC')
         .skip(page)
         .take(pageSize)
 
