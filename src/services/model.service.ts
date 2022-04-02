@@ -32,28 +32,27 @@ export class ModelService {
         @inject(TYPES.RealtimeFactory) private realtimeFactory: RealtimeFactory,
     ) {}
 
-    async getModel(modelId: number, user: User): Promise<Model> {
-        return this.modelRepository.findOneOrFail({id: modelId, user: user.id});
+    async getModel(modelId: number): Promise<Model> {
+        return this.modelRepository.findOneOrFail({id: modelId});
     }
 
-    async registerModel(modelManifest: ModelManifestItem, user: User): Promise<ModelViewModel> {
-        let savedModel = await this.saveModel(modelManifest, user);
+    async registerModel(modelManifest: ModelManifestItem): Promise<ModelViewModel> {
+        let savedModel = await this.saveModel(modelManifest);
         return this.modelFactory.buildModelViewModel(savedModel);
     }
 
-    async saveModel(modelManifest: ModelManifestItem, user: User): Promise<Model> {
-        let model = this.modelFactory.buildModel(modelManifest, user.id);
+    async saveModel(modelManifest: ModelManifestItem): Promise<Model> {
+        let model = this.modelFactory.buildModel(modelManifest);
 
         try {
             console.log('downloading model')
             this.realtimeService.sendNotification(`Successfully downloaded ${model.image}`, 
-                                                  Notifications.modelReady,
-                                                  user.id)
+                                                  Notifications.modelReady, -1)
 
             let savedModel = await this.modelRepository.save(model);
-            await this.modelRepository.update({image: model.image, user: user.id}, {pulled: true, failedPull: false})
+            await this.modelRepository.update({image: model.image}, {pulled: true, failedPull: false})
 
-            await this.jobService.saveEvalJob(model, user)
+            await this.jobService.saveEvalJob(model)
             return savedModel
         } catch (e) {
             throw new Error(e)
@@ -61,32 +60,32 @@ export class ModelService {
 
     }
 
-    async getModels(user: User): Promise<ModelViewModel[]> {
-        let models = await this.modelRepository.find({user: user.id});
+    async getModels(): Promise<ModelViewModel[]> {
+        let models = await this.modelRepository.find();
         return models.map(m => this.modelFactory.buildModelViewModel(m));
     }
 
-    async setClassifier(modelName:string, modality: Modality, user: User): Promise<ModelViewModel> {
-        let classifier = await this.classifierRepository.findOne({modality, user: user.id});
-        let model = await this.modelRepository.findOne({image: modelName, user: user.id})
+    async setClassifier(modelName:string, modality: Modality): Promise<ModelViewModel> {
+        let classifier = await this.classifierRepository.findOne({modality});
+        let model = await this.modelRepository.findOne({image: modelName})
 
         if(model == undefined) {
             let manifestItem = _.find(ModelManifest, m => m.tag === modelName)
-            model = await this.saveModel(manifestItem, user)
+            model = await this.saveModel(manifestItem, )
         } 
 
         if(!classifier) {
-            let classifer = this.modelFactory.buildClassifier(model, user.id);
+            let classifer = this.modelFactory.buildClassifier(model);
             await this.classifierRepository.save(classifer);
         } else {
-            await this.classifierRepository.update({ id: classifier.id, user: user.id }, { model })
+            await this.classifierRepository.update({ id: classifier.id}, { model })
         }
 
         return this.modelFactory.buildModelViewModel(model);
     }
     
-    async getClassifiers(user: User): Promise<any[]> {
-        let classifiers = await this.classifierRepository.find({user: user.id});
+    async getClassifiers(): Promise<any[]> {
+        let classifiers = await this.classifierRepository.find();
         return classifiers;
     }
 
@@ -105,25 +104,25 @@ export class ModelService {
         return Array.from(set);
     }
 
-    async getDownloadableModels (user: User): Promise<ModelManifestItem[]> {
-        let models = await this.modelRepository.find({user: user.id})
+    async getDownloadableModels (): Promise<ModelManifestItem[]> {
+        let models = await this.modelRepository.find()
 
         let filteredManifest = _.filter(ModelManifest, mm => _.findIndex(models, (m:Model) => m.image === mm.tag) === -1)
 
         return filteredManifest;
     }
 
-    async retryModelDownload(image: string, user: User): Promise<ModelViewModel> {
+    async retryModelDownload(image: string): Promise<ModelViewModel> {
         let manifest = _.find(ModelManifest, mi => mi.tag === image);
-        let model = await this.modelRepository.findOne({image: manifest.tag, user: user.id});
+        let model = await this.modelRepository.findOne({image: manifest.tag});
 
-        await this.jobService.deleteEvalJobByModelId(model.id, user);
-        await this.modelRepository.delete({image: manifest.tag, user: user.id});
-        return this.registerModel(manifest, user);
+        await this.jobService.deleteEvalJobByModelId(model.id);
+        await this.modelRepository.delete({image: manifest.tag});
+        return this.registerModel(manifest);
     }
 
-    async deleteModel(modelId: number, user: User): Promise<any> {
-        return await this.modelRepository.delete({id: modelId, user: user.id})
+    async deleteModel(modelId: number): Promise<any> {
+        return await this.modelRepository.delete({id: modelId})
     }
 
 

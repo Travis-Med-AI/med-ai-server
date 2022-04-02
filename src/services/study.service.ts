@@ -89,13 +89,12 @@ export class StudyService {
         return await this.studyRepository.findByIds(studIds)
     }
 
-    async checkForSeriesUID(csv: string, modelId: number, user:User): Promise<csvVerification>{
+    async checkForSeriesUID(csv: string, modelId: number): Promise<csvVerification>{
         let parse_mapped = await this.parseLabels(csv)
         let seriesIds: string[] = parse_mapped.map(r=>r.seriesUID.trim())
 
-        let model = await this.modelService.getModel(modelId, user);
+        let model = await this.modelService.getModel(modelId);
         let studies = await this.studyRepository.createQueryBuilder("study")
-        .where({user})
         .andWhere("study.seriesUid IN (:...seriesIds)", { seriesIds })
         .getMany();
 
@@ -108,13 +107,13 @@ export class StudyService {
         return parsed.map(r => this.studyFactory.buildLabelRow([...headers], r))
     }
 
-    async saveLabels(csv: string, modelId: number, user: User): Promise<{saveCount: number}> {
+    async saveLabels(csv: string, modelId: number): Promise<{saveCount: number}> {
         let parse_mapped = await this.parseLabels(csv)
-        let model = await this.modelService.getModel(modelId, user);
+        let model = await this.modelService.getModel(modelId);
         let saveCount = 0
         for (const row of parse_mapped){
             let series = await this.studyRepository.findOneOrFail({seriesUid: row.seriesUID})
-            let studyLabel = this.studyFactory.buildStudyLabel(row, series, model, user.id)
+            let studyLabel = this.studyFactory.buildStudyLabel(row, series, model)
             if (Object.keys(studyLabel.label).length) {
                 await this.studyLabelRepository.save(studyLabel)
                 saveCount++
@@ -123,11 +122,10 @@ export class StudyService {
         return {saveCount}
     }
 
-    async getLabelsByStudyIds(studyIds: number[], user: User): Promise<StudyLabel[]> {
+    async getLabelsByStudyIds(studyIds: number[]): Promise<StudyLabel[]> {
         let query = this.studyLabelRepository.createQueryBuilder("studyLabel")
         .innerJoinAndSelect('studyLabel.study', 'study')
         .innerJoinAndSelect('studyLabel.model', 'model')
-        .where({user})
         .andWhere("studyLabel.id IN (:...studyIds)", { studyIds })
 
         return query.getMany()

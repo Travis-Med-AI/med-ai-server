@@ -17,10 +17,6 @@ export class ModelTrain {
     @JoinColumn()
     model: Model;
 
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
-
     @Column({nullable: true, type: 'jsonb'})
     modelOutput: any;
 

@@ -32,9 +32,11 @@ export class StudyEvaluation {
     @Column({nullable: true})
     imgOutputPath: string
 
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
+    @Column({nullable: true})
+    startTime: number
+
+    @Column({nullable: true})
+    finishTime: number
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})
     lastUpdate: number;

@@ -32,6 +32,12 @@ export class Study {
     @Column( {nullable: true})
     description: string;
 
+    @Column({nullable: true, type: 'jsonb'})
+    studyMetadata: any;
+
+    @Column({nullable: true, type: 'jsonb'})
+    seriesMetadata: any;
+
     @Column({default: () => false})
     failed: boolean;
 

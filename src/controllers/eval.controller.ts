@@ -17,34 +17,34 @@ export class EvalController {
     @httpGet('', TYPES.AuthMiddleware)
     public async getStudyEval(req: CutsomRequest<any>, res: Response): Promise<PagedResponse<StudyEvalVM>> {
         let searchString = _.get(req.query as _.Dictionary<string>, 'searchString', '')
-        return this.evalService.getEvals(+req.query.page, +req.query.pageSize, searchString, req.user);
+        return this.evalService.getEvals(+req.query.page, +req.query.pageSize, searchString);
     }
 
     @httpPost('/results', TYPES.AuthMiddleware)
     public async getResultsByModel(req: CutsomRequest<{modelId:number}>, res: Response): Promise<Result[]> {
-        return this.evalService.getResults(req.body.modelId, req.user);
+        return this.evalService.getResults(req.body.modelId);
     }
 
     @httpGet('/:modelId/:studyId', TYPES.AuthMiddleware) 
     public async processDicom(req: CutsomRequest<any>, res: Response): Promise<{ message: string }> {
-        return this.evalService.processDicom(+req.params.modelId, +req.params.studyId, req.user);
+        return this.evalService.processDicom(+req.params.modelId, +req.params.studyId);
     }
 
     @httpGet('/logs', TYPES.AuthMiddleware)
     public async  getEvalLog(req: CutsomRequest<any>, res: Response) {
-        return this.evalService.getEvalLog(+req.query.evalId, req.user)
+        return this.evalService.getEvalLog(+req.query.evalId)
     }
 
     @httpGet('/output-image', TYPES.AuthMiddleware)
     public async  getOutputImage(req: CutsomRequest<any>, res: Response) {
-        let filePath = await this.evalService.getOutputImage(+req.query.evalId, req.user)
+        let filePath = await this.evalService.getOutputImage(+req.query.evalId)
         return fs.readFileSync(`/opt/images/${filePath}`)
     }
 
 
     @httpDelete('/:id', TYPES.AuthMiddleware)
     public async deleteEval(req: CutsomRequest<StudyEvalVM>, res:Response) {
-        return this.evalService.deleteEval(+req.params.id, req.user)
+        return this.evalService.deleteEval(+req.params.id)
     }
 
 }

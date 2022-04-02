@@ -13,10 +13,6 @@ export class StudyLabel {
     @JoinColumn()
     study: Study;
 
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
-
     @ManyToOne(type => Model, model => model.id, {eager: true, onUpdate: 'CASCADE', onDelete: 'CASCADE'})
     @JoinColumn()
     model: Model;

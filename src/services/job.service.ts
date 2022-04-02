@@ -23,9 +23,8 @@ export class JobService {
         @inject(TYPES.EvalFactory) private evalFactory: EvalFactory,
     ) {}
 
-    async getEvalJobs(user: User): Promise<EvalJobViewModel[]> {
+    async getEvalJobs(): Promise<EvalJobViewModel[]> {
         let evalJobs = await this.jobRepository.find({
-            where: {user},
             relations: ['model'],     
             order: {
                 id: "ASC",
@@ -34,36 +33,36 @@ export class JobService {
         return _.map(evalJobs, job => this.evalFactory.buildEvalJobVM(job, job.model as Model, job.running))
     }
 
-    async killJob(jobId, user: User): Promise<EvalJobViewModel> {
-        let job = await this.jobRepository.findOneOrFail({id: jobId, user: user.id});
+    async killJob(jobId): Promise<EvalJobViewModel> {
+        let job = await this.jobRepository.findOneOrFail({id: jobId});
         job.running = false;
         job = await this.jobRepository.save(job);
         return this.evalFactory.buildEvalJobVM(job, job.model, false);
     }
 
-    async startJob(jobId: number, user: User): Promise<{updated: number}> {
-        let jobDB: UpdateResult = await this.jobRepository.update({id: jobId, user: user.id}, {running: true})
+    async startJob(jobId: number): Promise<{updated: number}> {
+        let jobDB: UpdateResult = await this.jobRepository.update({id: jobId}, {running: true})
         return { updated: jobDB.affected }
     }
 
-    async toggleCPU(jobId: number, user: User): Promise<{updated: number}> {
-        let jobDB: EvalJob = await this.jobRepository.findOne({id:jobId, user: user.id})
-        let result: UpdateResult = await this.jobRepository.update({id: jobId, user: user.id}, {cpu: !jobDB.cpu})
+    async toggleCPU(jobId: number): Promise<{updated: number}> {
+        let jobDB: EvalJob = await this.jobRepository.findOne({id:jobId})
+        let result: UpdateResult = await this.jobRepository.update({id: jobId}, {cpu: !jobDB.cpu})
         return { updated: result.affected }
     }
 
-    async saveEvalJob(model: Model, user: User): Promise<EvalJob> {
-        let evalJob = this.evalFactory.buildEvalJob(model, false, user.id)
+    async saveEvalJob(model: Model): Promise<EvalJob> {
+        let evalJob = this.evalFactory.buildEvalJob(model, false)
         return this.jobRepository.save(evalJob)
     }
 
-    async deleteEvalJobByModelId(modelId: number, user: User): Promise<DeleteResult> {
-        return this.jobRepository.delete({model: modelId as any, user: user.id})
+    async deleteEvalJobByModelId(modelId: number): Promise<DeleteResult> {
+        return this.jobRepository.delete({model: modelId as any})
     }
 
 
-    async changeReplicas(evalId: number, replicas: number, user:User): Promise<EvalJobViewModel> {
-        let job = await this.jobRepository.findOne({id: evalId, user: user.id});
+    async changeReplicas(evalId: number, replicas: number): Promise<EvalJobViewModel> {
+        let job = await this.jobRepository.findOne({id: evalId});
         job.replicas = replicas
         job = await this.jobRepository.save(job)
         return this.evalFactory.buildEvalJobVM(job, job.model, true)

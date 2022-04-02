@@ -16,10 +16,6 @@ export class ModelTrain {
     @Column({default: false})
     training: boolean;
 
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
-
     @Column({default: false})
     failed: boolean;
 }

@@ -43,12 +43,12 @@ export class StudyController {
     @httpPost('/check-series-ids', multer().single('csv'), TYPES.AuthMiddleware)
     public async checkForSeriesUID(req: CutsomRequest<any>, res: Response): Promise<csvVerification> {
         let file = req.file.buffer.toString('utf8')
-        return this.studyService.checkForSeriesUID(file, parseInt(req.body.modelId), req.user)
+        return this.studyService.checkForSeriesUID(file, parseInt(req.body.modelId))
     }
 
     @httpPost('/save-labels', multer().single('csv'), TYPES.AuthMiddleware)
     public async saveLabels(req: CutsomRequest<any>, res: Response): Promise<{saveCount: number}> {
         let file = req.file.buffer.toString('utf8')
-        return this.studyService.saveLabels(file, parseInt(req.body.modelId), req.user)
+        return this.studyService.saveLabels(file, parseInt(req.body.modelId))
     }
 }

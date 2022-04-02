@@ -9,7 +9,7 @@ import { Classifier } from '../entity/Classifier.entity';
 @injectable()
 export class ModelFactory {
 
-    buildModel(modelVM: ModelManifestItem, user: number): Model {
+    buildModel(modelVM: ModelManifestItem): Model {
         let { tag, input, output, inputType, displayName, outputKeys } = modelVM;
 
         let model = new Model();
@@ -21,7 +21,6 @@ export class ModelFactory {
         model.hasImageOutput = modelVM.hasImageOutput
         model.modality = modelVM.modality
         model.outputKeys = outputKeys
-        model.user = user
 
         return model;
     }
@@ -43,11 +42,10 @@ export class ModelFactory {
     }
 
 
-    buildClassifier(model: Model, user: number) {
+    buildClassifier(model: Model) {
         let classifer = new Classifier();
         classifer.model = model;
         classifer.modality = model.modality
-        classifer.user = user
 
         return classifer;
     }

@@ -51,7 +51,7 @@ export class ExperimentService {
             let studyIds = e.studies.map(s => s.id);
             let evaluations = [];
             if (studyIds.length > 0) {
-                evaluations = await this.evalService.getEvalsByStudyIds(studyIds, user)
+                evaluations = await this.evalService.getEvalsByStudyIds(studyIds)
             }
             return this.experimentFactory.buildExperimentViewModel(e, evaluations);
         });
@@ -133,7 +133,7 @@ export class ExperimentService {
     }
 
     async startExperiment(experimentId: number, modelId: number, user: User): Promise<ExperimentViewModel> {
-        let model = await this.modelService.getModel(modelId, user);
+        let model = await this.modelService.getModel(modelId);
         await this.experimentRepository.update({id: experimentId, user: user.id}, {model, status: ExperimentStatus.RUNNING})
 
         let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id});
@@ -155,7 +155,7 @@ export class ExperimentService {
         let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id})
 
         // TODO: FIX THIS!!!
-        let evals = await this.evalService.evalRepository.find({user: user.id})
+        let evals = await this.evalService.evalRepository.find()
 
         let probs = _.get(evals[0], 'modelOutput.class_probabilities')
 
@@ -190,7 +190,7 @@ export class ExperimentService {
     async downloadKaggleCSV(experimentId: number, user:User) {
         let experiment = await this.experimentRepository.findOne({id: experimentId, user: user.id})
 
-        let evals = await this.evalService.evalRepository.find({user: user.id})
+        let evals = await this.evalService.evalRepository.find()
 
         let probs = []
 
@@ -235,8 +235,8 @@ export class ExperimentService {
     async getExperimentStats(experimentId: number, user: User) {
         let experiment = await this.experimentRepository.findOne({id:experimentId, user: user.id});
         let studyIds = experiment.studies.map(s => s.id)
-        let evals = await this.evalService.getEvalsByStudyIds(studyIds,user)
-        let labels = await this.studyService.getLabelsByStudyIds(studyIds, user)
+        let evals = await this.evalService.getEvalsByStudyIds(studyIds)
+        let labels = await this.studyService.getLabelsByStudyIds(studyIds)
         return this.experimentFactory.buildEvalStats(evals, labels, experiment.model, experiment)
     }
 }

@@ -31,32 +31,29 @@ export class EvalService {
         @inject(TYPES.ModelFactory) private modelFactory: ModelFactory,
     ) {}
 
-    async evaluateStudy(modelId: number, studyId: number, user: User): Promise<StudyEvaluation> {
+    async evaluateStudy(modelId: number, studyId: number): Promise<StudyEvaluation> {
         let study = await this.studyService.getStudy(studyId)
-        let studyEval = this.evalFactory.buildStudyEval(modelId, study, EvaluationStatus.running, user.id);
+        let studyEval = this.evalFactory.buildStudyEval(modelId, study, EvaluationStatus.running);
         
         return this.evalRepository.save(studyEval)
     }
 
-    async getEvalsByStudyIds(studyIds: number[], user: User): Promise<StudyEvaluation[]> {
+    async getEvalsByStudyIds(studyIds: number[]): Promise<StudyEvaluation[]> {
         let query = this.evalRepository.createQueryBuilder('eval')
         .leftJoinAndSelect('eval.study', 'study')
-        .where({user})
         .andWhere('study.id IN (:...studyIds)', {studyIds})
         
 
         return query.getMany();
     }
 
-    async getEvals(page: number, pageSize: number, searchString: string, user: User): Promise<PagedResponse<StudyEvalVM>> {
+    async getEvals(page: number, pageSize: number, searchString: string): Promise<PagedResponse<StudyEvalVM>> {
         let query = this.evalRepository.createQueryBuilder('eval')
         .innerJoinAndSelect('eval.study', 'study')
         .innerJoinAndSelect('eval.model', 'model')
-        .where({user})
         .andWhere('study.patientId like :patientId', {patientId: `%${searchString}%`})
         .orWhere('study.orthancStudyId like :orthancId', {orthancId: `%${searchString}%`})
         .orWhere('eval."modelOutput"::TEXT like :output', {output: `%${searchString}%`})
-        .addOrderBy('eval.lastUpdate', 'DESC')
         .addOrderBy('eval.status', 'DESC')
         .skip(page)
         .take(pageSize)
@@ -72,35 +69,35 @@ export class EvalService {
         return this.responseFactory.buildPagedResponse<StudyEvalVM>(studyEvalVMs, evals[1])
     }
 
-    async getOutputImage(evalId: number, user: User) {
-        let evaluation = await this.evalRepository.findOne({id:evalId, user: user.id})
+    async getOutputImage(evalId: number) {
+        let evaluation = await this.evalRepository.findOne({id:evalId})
         console.log('image path is ', evaluation.imgOutputPath)
 
         return evaluation.imgOutputPath;
     }
 
-    async deleteEval(evalId: number, user: User) {
-        return this.evalRepository.delete({id:evalId, user: user.id})
+    async deleteEval(evalId: number) {
+        return this.evalRepository.delete({id:evalId})
     }
 
-    async processDicom(modelId: number, studyId: number, user: User): Promise<any>{
+    async processDicom(modelId: number, studyId: number): Promise<any>{
         let study = await this.studyService.getStudy(studyId);
-        let model = await this.modelService.getModel(modelId, user);
+        let model = await this.modelService.getModel(modelId);
 
         this.settings.startCeleryTask('runner.evaluate_dicom', [model.id, study.orthancStudyId])
 
         return {message: 'started task'}
     }
 
-    async getEvalLog(evalId:number, user: User): Promise<string[]> {
-        let evaluation = await this.evalRepository.findOne({id: evalId, user: user.id});
+    async getEvalLog(evalId:number): Promise<string[]> {
+        let evaluation = await this.evalRepository.findOne({id: evalId});
 
         return evaluation.stdout;
     }
 
-    async getResults(modelId: number, user:User): Promise<Result[]> {
-        let model = await this.modelService.getModel(modelId, user)
-        let evaluations = await this.evalRepository.find({model: model, user: user.id})
+    async getResults(modelId: number): Promise<Result[]> {
+        let model = await this.modelService.getModel(modelId)
+        let evaluations = await this.evalRepository.find({model: model})
 
         return evaluations.map(e => this.evalFactory.buildResult(e, model))
     }

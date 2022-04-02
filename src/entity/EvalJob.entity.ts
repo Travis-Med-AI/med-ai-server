@@ -23,11 +23,4 @@ export class EvalJob {
 
     @Column({default: 0})
     replicas: number
-
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
-
-    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)"})
-    lastRun: number;
 }

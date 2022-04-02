@@ -35,10 +35,6 @@ export class Model {
     @Column({default: false})
     pulled: boolean;
 
-    @ManyToOne(type => User, user => user.id, {onUpdate: 'CASCADE', onDelete: 'CASCADE' })
-    @JoinColumn()
-    user: number;
-
     @Column({default: false})
     failedPull: boolean;
 

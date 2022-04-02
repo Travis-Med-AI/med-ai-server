@@ -15,12 +15,12 @@ export class ModelController {
 
     @httpGet('', TYPES.AuthMiddleware)
     public async getModels(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel[]> {
-        return this.modelService.getModels(req.user);
+        return this.modelService.getModels();
     }
 
     @httpDelete('/:id', TYPES.AuthMiddleware)
     public async deleteModel(req: CutsomRequest<any>, res: Response): Promise<any> {
-        return this.modelService.deleteModel(+req.params.id, req.user);
+        return this.modelService.deleteModel(+req.params.id);
     }
 
     @httpGet('/images', TYPES.AuthMiddleware)
@@ -30,27 +30,27 @@ export class ModelController {
 
     @httpGet('/available', TYPES.AuthMiddleware)
     public async getDownloadableImages(req: CutsomRequest<any>, res: Response): Promise<ModelManifestItem[]> {
-        return this.modelService.getDownloadableModels(req.user);
+        return this.modelService.getDownloadableModels();
     }
 
     @httpPost('/register', TYPES.AuthMiddleware)
     public async registerModel(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel> {
-        return this.modelService.registerModel(req.body, req.user)
+        return this.modelService.registerModel(req.body)
     }
 
     @httpPost('/retry', TYPES.AuthMiddleware)
     public async retryDownload(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
-        return this.modelService.retryModelDownload(req.body.image, req.user)
+        return this.modelService.retryModelDownload(req.body.image)
     }
 
     @httpPost('/classifier', TYPES.AuthMiddleware)
     public async setClassifier(req: CutsomRequest<ModelViewModel>, res: Response): Promise<ModelViewModel> {
-        return this.modelService.setClassifier(req.body.image, req.body.modality, req.user);
+        return this.modelService.setClassifier(req.body.image, req.body.modality);
     }
 
     @httpGet('/classifiers', TYPES.AuthMiddleware)
     public async getClassifier(req: CutsomRequest<any>, res: Response): Promise<ClassifierViewModel[]> {
-        return this.modelService.getClassifiers(req.user);
+        return this.modelService.getClassifiers();
     }
 
     @httpPost('/modality', TYPES.AuthMiddleware)

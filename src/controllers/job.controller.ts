@@ -15,26 +15,26 @@ export class JobController {
 
     @httpGet('', TYPES.AuthMiddleware)
     public async getEvalJobs(req: CutsomRequest<any>, res: Response): Promise<EvalJobViewModel[]> {
-        return this.jobService.getEvalJobs(req.user);
+        return this.jobService.getEvalJobs();
     }
 
     @httpPost('/start', TYPES.AuthMiddleware)
     public async startJob(req: CutsomRequest<{id:number}>, res: Response): Promise<{updated: number}> {
-        return this.jobService.startJob(req.body.id, req.user);
+        return this.jobService.startJob(req.body.id);
     }
 
     @httpPost('/cpu', TYPES.AuthMiddleware)
     public async toggleCPU(req: CutsomRequest<{id:number}>, res: Response): Promise<{updated: number}> {
-        return this.jobService.toggleCPU(req.body.id, req.user);
+        return this.jobService.toggleCPU(req.body.id);
     }
 
     @httpPost('/kill', TYPES.AuthMiddleware)
     public async killJob(req: CutsomRequest<{id: number}>, res: Response): Promise<EvalJobViewModel> {
-        return this.jobService.killJob(req.body.id, req.user);
+        return this.jobService.killJob(req.body.id);
     }
 
     @httpPost('/replicas', TYPES.AuthMiddleware)
     public async updateReplicas(req: CutsomRequest<{id:number, replicas: number}>, res: Response): Promise<EvalJobViewModel> {
-        return this.jobService.changeReplicas(req.body.id, req.body.replicas, req.user);
+        return this.jobService.changeReplicas(req.body.id, req.body.replicas);
     }
 }
