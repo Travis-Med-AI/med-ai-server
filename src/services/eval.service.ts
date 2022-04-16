@@ -95,9 +95,10 @@ export class EvalService {
         return evaluation.stdout;
     }
 
-    async getResults(modelId: number): Promise<Result[]> {
+    async getResults(modelId: number, date: number): Promise<Result[]> {
         let model = await this.modelService.getModel(modelId)
         let evaluations = await this.evalRepository.find({model: model})
+        evaluations = evaluations.filter(e => e.finishTime > date)
 
         return evaluations.map(e => this.evalFactory.buildResult(e, model))
     }

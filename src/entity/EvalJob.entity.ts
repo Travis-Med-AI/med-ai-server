@@ -21,6 +21,9 @@ export class EvalJob {
     @Column({default: false})
     cpu: boolean;
 
+    @Column({default: false})
+    deleteOrthanc: boolean;
+
     @Column({default: 0})
     replicas: number
 }

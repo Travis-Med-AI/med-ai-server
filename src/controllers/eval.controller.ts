@@ -20,11 +20,6 @@ export class EvalController {
         return this.evalService.getEvals(+req.query.page, +req.query.pageSize, searchString);
     }
 
-    @httpPost('/results', TYPES.AuthMiddleware)
-    public async getResultsByModel(req: CutsomRequest<{modelId:number}>, res: Response): Promise<Result[]> {
-        return this.evalService.getResults(req.body.modelId);
-    }
-
     @httpGet('/:modelId/:studyId', TYPES.AuthMiddleware) 
     public async processDicom(req: CutsomRequest<any>, res: Response): Promise<{ message: string }> {
         return this.evalService.processDicom(+req.params.modelId, +req.params.studyId);

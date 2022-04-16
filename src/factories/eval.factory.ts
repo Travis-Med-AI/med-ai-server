@@ -55,7 +55,8 @@ export class EvalFactory {
             model: this.modelFactory.buildModelViewModel(model),
             running,
             cpu: job.cpu,
-            replicas: job.replicas
+            replicas: job.replicas,
+            deleteOrthanc: job.deleteOrthanc
         }
     }
 
@@ -64,8 +65,9 @@ export class EvalFactory {
             modelId: model.id,
             output: _.get(evaluation.modelOutput, 'class_probabilities', {}),
             seriesUID: evaluation.study.seriesUid,
-            studyUID: evaluation.study.studyUid
-
+            studyUID: evaluation.study.studyUid,
+            date:evaluation.finishTime,
+            imageUrl: evaluation.imgOutputPath
         }
     }
 }

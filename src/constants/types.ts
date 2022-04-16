@@ -9,6 +9,7 @@ export const TYPES = {
 
     AuthMiddleware: Symbol.for('AuthMiddleware'),
     AdminMiddleware: Symbol.for('AdminMiddleware'),
+    ResultMiddleware: Symbol.for('ResultMiddleware'),
 
     AiFatory: Symbol.for('AiFactory'),
     AiService: Symbol.for('AiService'),

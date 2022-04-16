@@ -67,4 +67,12 @@ export class JobService {
         job = await this.jobRepository.save(job)
         return this.evalFactory.buildEvalJobVM(job, job.model, true)
     }
+
+    async deleteOrthancOnComplete(jobId: number) {
+        let jobDB: EvalJob = await this.jobRepository.findOne({id:jobId})
+        let result: UpdateResult = await this.jobRepository.update({id: jobId}, {deleteOrthanc: !jobDB.deleteOrthanc})
+        return { updated: result.affected }
+    }
+
+
 }

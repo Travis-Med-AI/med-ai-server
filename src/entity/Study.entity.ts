@@ -12,6 +12,9 @@ export class Study {
     orthancStudyId: string;
 
     @Column({nullable: true})
+    orthancParentId: string;
+
+    @Column({nullable: true})
     patientId: string;    
     
     @Column({nullable: true})
@@ -41,7 +44,10 @@ export class Study {
     @Column({default: () => false})
     failed: boolean;
 
-    @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)"})
+    @Column({default: () => false})
+    deletedFromOrthanc: boolean;
+
+    @Column({type: 'bigint', default: () => "EXTRACT(EPOCH FROM NOW())"})
     dateAdded: number;
 
     @Column({type: 'timestamp', precision: 3, default: () => "CURRENT_TIMESTAMP(3)", onUpdate: "CURRENT_TIMESTAMP(3)"})

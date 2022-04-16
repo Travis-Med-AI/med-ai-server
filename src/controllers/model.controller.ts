@@ -7,15 +7,23 @@ import { ModelService } from "../services/model.service";
 import { Modality, ModelViewModel } from "med-ai-common";
 import { Response } from "express";
 import { ModelManifestItem, ClassifierViewModel } from "med-ai-common";
+import { EvalService } from "../services/eval.service";
+import { Result } from "../interfaces/Results";
 
 
 @controller('/models')
 export class ModelController {
-    constructor(@inject(TYPES.ModelService) private modelService: ModelService) {}
+    constructor(@inject(TYPES.ModelService) private modelService: ModelService,
+                @inject(TYPES.EvalService) private evalService: EvalService) {}
 
     @httpGet('', TYPES.AuthMiddleware)
     public async getModels(req: CutsomRequest<any>, res: Response): Promise<ModelViewModel[]> {
         return this.modelService.getModels();
+    }
+
+    @httpGet('/:modelId/:date', TYPES.ResultMiddleware)
+    public async getResultsByModel(req: CutsomRequest<any>, res: Response): Promise<Result[]> {
+        return this.evalService.getResults(+req.params.modelId, +req.params.date);
     }
 
     @httpDelete('/:id', TYPES.AuthMiddleware)

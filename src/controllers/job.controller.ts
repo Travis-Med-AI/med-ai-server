@@ -33,6 +33,11 @@ export class JobController {
         return this.jobService.killJob(req.body.id);
     }
 
+    @httpPost('/deleteOthanc', TYPES.AuthMiddleware)
+    public async deleteOrthancOnComplete(req: CutsomRequest<{id: number}>, res: Response): Promise<any> {
+        return this.jobService.deleteOrthancOnComplete(req.body.id);
+    }
+
     @httpPost('/replicas', TYPES.AuthMiddleware)
     public async updateReplicas(req: CutsomRequest<{id:number, replicas: number}>, res: Response): Promise<EvalJobViewModel> {
         return this.jobService.changeReplicas(req.body.id, req.body.replicas);

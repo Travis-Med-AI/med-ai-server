@@ -6,3 +6,4 @@ export * from './study.controller';
 export * from './monitor.controller';
 export * from './realtime.controller';
 export * from './experiment.controller';
+export * from './results.controller';
