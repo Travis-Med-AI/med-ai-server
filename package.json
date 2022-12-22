@@ -36,7 +36,7 @@
     "inversify-logger-middleware": "~3.1.0",
     "jest": "^27.5.1",
     "json2csv": "^5.0.5",
-    "jsonwebtoken": "~8.5.1",
+    "jsonwebtoken": "~9.0.0",
     "lodash": "^4.17.21",
     "log4js": "~6.3.0",
     "med-ai-common": "git+https://github.com/Travis-Med-AI/med-ai-common.git",
