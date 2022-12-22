@@ -48,7 +48,7 @@
     "parse-database-url": "^0.3.0",
     "pg": "~7.18.2",
     "reflect-metadata": "~0.1.10",
-    "socket.io": "~2.3.0",
+    "socket.io": "~2.5.0",
     "systeminformation": "~4.27.3",
     "typeorm": "0.2.32",
     "unzipper": "~0.10.11"
